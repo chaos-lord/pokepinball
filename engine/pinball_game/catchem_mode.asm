@@ -7,6 +7,9 @@ StartCatchEmMode: ; 0x1003f
 	xor a
 	ld [wSpecialMode], a
 	ld [wd54d], a
+	ld a,[wOverrideFlag]
+	and a
+	jp nz, .Override
 	ld a, [wCurrentStage]
 	sla a
 	ld c, a
@@ -45,6 +48,12 @@ StartCatchEmMode: ; 0x1003f
 	ld a, [hl]  ; a contains mon id
 	dec a
 	ld [wCurrentCatchEmMon], a
+	jp .NoOverride
+.Override
+    xor a
+    ld [wOverrideFlag], a
+	ld a, [wCatchMonOverride]
+.NoOverride
 	ld a, [wCurrentCatchEmMon]
 	ld c, a
 	ld b, $0
@@ -1031,6 +1040,9 @@ AddCaughtPokemonToParty: ; 0x1073d
 	add hl, bc
 	ld a, [wCurrentCatchEmMon]
 	ld [hl], a
+	ld [wCaughtMonPickup] , a
+	ld a, 1
+	ld [wCaughtFlag], a
 	ld a, [wNumPartyMons]
 	inc a
 	ld [wNumPartyMons], a

@@ -2410,6 +2410,17 @@ wBootCheck:: ; 0xdaa3
 
 ; $25c bytes of free space
 
+wCaughtFlag:
+    ds 1
+wCaughtMonPickup:
+    ds 1
+wOverrideFlag:
+    ds 1
+wCatchMonOverride:
+    ds 1
+
+
+
 SECTION "Audio RAM", WRAMX
 wdd00:: ; 0xdd00
 	ds $1

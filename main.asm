@@ -529,6 +529,9 @@ Func_10ca5: ; 0x10ca5
 	cp $ff
 	ret z
 	ld [hl], a
+    ld [wCaughtMonPickup] , a
+    ld a, 1
+	ld [wCaughtFlag], a
 	ret
 
 Func_10cb7: ; 0x10cb7
@@ -2212,7 +2215,7 @@ Data_3809a:
 
 Data_380a6:
 	db $59, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-	
+
 	RGB 31, 31, 31
     RGB 31, 31, 31
     RGB 31, 31, 31
@@ -2391,7 +2394,7 @@ INCLUDE "data/mon_gfx/mon_billboard_pics_1.asm"
 
 StageRedFieldTopStatusBarSymbolsGfx_GameBoy: ; 0x63000
 	INCBIN "gfx/stage/red_top/status_bar_symbols_gameboy.2bpp"
-	
+
 	INCBIN "gfx/unused_pocket_monster.2bpp"
 
 SECTION "bank18.2", ROMX
@@ -2412,7 +2415,7 @@ INCLUDE "data/mon_gfx/mon_billboard_pics_3.asm"
 
 StageBlueFieldTopStatusBarSymbolsGfx_GameBoy: ; 0x6b000
 	INCBIN "gfx/stage/blue_top/status_bar_symbols_gameboy.2bpp"
-	
+
 	INCBIN "gfx/unused_pocket_monster.2bpp"
 	ds $20 ; free space
 
@@ -2630,7 +2633,7 @@ PikachuSaverGfx: ; 0xa8720
 
 BallCaptureSmokeGfx:
 	INCBIN "gfx/stage/ball_capture_smoke.interleave.2bpp"
-	
+
 SECTION "bank2a.2", ROMX
 
 PinballGreatballGfx: ; 0xa8a00
@@ -2673,7 +2676,7 @@ PokedexInitialGfx:
 
 StageBlueFieldBottomCollisionMasks: ; 0xaf000
 	INCBIN "data/collision/masks/blue_stage_bottom.masks"
-	
+
 SECTION "bank2b.2", ROMX
 
 DiglettBonusDugtrio3Gfx: ; 0xaf900
@@ -2841,7 +2844,7 @@ StageRedFieldBottomTilemap2_GameBoyColor: ; 0xbec00
 
 StageBlueFieldTopTilemap_GameBoy: ; 0xbf000
 	INCBIN "gfx/tilemaps/stage_blue_field_top_gameboy.map"
-	
+
 SECTION "bank2f.3", ROMX
 
 EraseAllDataTilemap: ; 0xbf800
@@ -2853,7 +2856,7 @@ SECTION "bank30", ROMX
 
 StageBlueFieldBottomTilemap_GameBoy: ; 0xc0000
 	INCBIN "gfx/tilemaps/stage_blue_field_bottom_gameboy.map"
-	
+
 SECTION "bank30.2", ROMX
 
 StageBlueFieldTopCollisionMasks: ; 0xc0800
@@ -2878,7 +2881,7 @@ StageBlueFieldTopCollisionAttributes: ; 0xc2800
 
 OptionMenuTilemap2: ; 0xc3000
 	INCBIN "gfx/tilemaps/option_menu_2.map"
-	
+
 SECTION "bank30.3", ROMX
 
 OptionMenuTilemap4: ; 0xc3400
@@ -3072,7 +3075,7 @@ GFX_d61b0: INCBIN "gfx/unknown/d61b0.2bpp"
 E_Acute_CharacterGfx: INCBIN "gfx/stage/e_acute_mono.2bpp"
 GFX_d61d0: INCBIN "gfx/unknown/d61d0.2bpp"
 GFX_d61e0: INCBIN "gfx/unknown/d61e0.2bpp"
-	
+
 SECTION "bank35.5", ROMX
 
 Alphabet2Gfx: ; 0xd6200
@@ -3153,7 +3156,7 @@ INCLUDE "data/mon_gfx/mon_billboard_palette_maps_4.asm"
 
 StageSharedBonusSlotGlowGfx: ; 0xdac00
 	INCBIN "gfx/stage/shared/bonus_slot_glow.2bpp"
-	
+
 SECTION "bank36.4", ROMX
 
 StageSharedBonusSlotGlow2Gfx: ; 0xdade0
@@ -3185,7 +3188,7 @@ INCLUDE "data/mon_gfx/mon_billboard_palettes_4.asm"
 
 StageRedFieldTopGfx6: ; 0xdbb80
 	INCBIN "gfx/stage/red_top/red_top_6.2bpp"
-	
+
 SECTION "bank36.8", ROMX
 
 StageMewtwoBonusCollisionMasks: ; 0xdbc80
@@ -3204,7 +3207,7 @@ SECTION "bank37", ROMX
 
 StageSharedArrowsGfx: ; 0xdc000
 	INCBIN "gfx/stage/shared/arrows.2bpp"
-	
+
 SECTION "bank37.2", ROMX
 
 INCLUDE "data/mon_gfx/mon_billboard_palettes_5.asm"
