@@ -2410,13 +2410,13 @@ wBootCheck:: ; 0xdaa3
 
 ; $25c bytes of free space
 
-wCaughtFlag:
+wCaughtFlag::
     ds 1
-wCaughtMonPickup:
+wCaughtMonPickup::
     ds 1
-wOverrideFlag:
+wOverrideFlag::
     ds 1
-wCatchMonOverride:
+wCatchMonOverride::
     ds 1
 
 

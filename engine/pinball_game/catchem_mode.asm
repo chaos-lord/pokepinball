@@ -1040,7 +1040,7 @@ AddCaughtPokemonToParty: ; 0x1073d
 	add hl, bc
 	ld a, [wCurrentCatchEmMon]
 	ld [hl], a
-	ld [wCaughtMonPickup] , a
+	ld [wCaughtMonPickup], a
 	ld a, 1
 	ld [wCaughtFlag], a
 	ld a, [wNumPartyMons]
