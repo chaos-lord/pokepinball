@@ -47,13 +47,13 @@ StartCatchEmMode: ; 0x1003f
 	add hl, bc
 	ld a, [hl]  ; a contains mon id
 	dec a
-	ld [wCurrentCatchEmMon], a
 	jp .NoOverride
 .Override
     xor a
     ld [wOverrideFlag], a
 	ld a, [wCatchMonOverride]
 .NoOverride
+    ld [wCurrentCatchEmMon], a
 	ld a, [wCurrentCatchEmMon]
 	ld c, a
 	ld b, $0
