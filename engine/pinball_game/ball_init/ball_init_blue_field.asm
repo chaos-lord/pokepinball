@@ -11,9 +11,9 @@ InitBallBlueField: ; 0x1c08d
 	ld a, $98
 	ld [wBallYPos + 1], a
 	xor a
-	ld [wd549], a
+	ld [wEnableBallGravityAndTilt], a
 	ld [wd580], a
-	call Func_1c7c7
+	call InitBlueFieldCollisionAttributes
 	ld a, [wd4c9]
 	and a
 	ret z
@@ -25,14 +25,14 @@ InitBallBlueField: ; 0x1c08d
 	ld [wPikachuSaverSlotRewardActive], a
 	ld [wd51e], a
 	ld [wPikachuSaverCharge], a
-	ld hl, wd50f
+	ld hl, wCAVELightStates
 	ld [hli], a
 	ld [hli], a
 	ld [hli], a
 	ld [hli], a
 	ld [wLeftMapMoveCounter], a
 	ld [wRightMapMoveCounter], a
-	ld hl, wd5f9
+	ld hl, wBallUpgradeTriggerStates
 	ld [hli], a
 	ld [hli], a
 	ld [hli], a
@@ -52,12 +52,12 @@ InitBallBlueField: ; 0x1c08d
 	ld [wNumPikachuSaves], a
 	ld [wd613], a
 	inc a
-	ld [wd482], a
+	ld [wCurBonusMultiplier], a
 	ld [wd4ef], a
 	ld [wd4f1], a
 	ld a, $3
 	ld [wd610], a
-	call Func_1d65f
+	call GetBCDForNextBonusMultiplier_BlueField
 	ld a, $10
 	call SetSongBank
 	ld de, $0001

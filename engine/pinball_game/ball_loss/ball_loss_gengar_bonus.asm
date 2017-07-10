@@ -14,8 +14,8 @@ HandleBallLossGengarBonus: ; 0xdf1a
 	ld a, [wd6a7]
 	and a
 	ret nz
-	ld [wd548], a
-	ld [wd549], a
+	ld [wPinballIsVisible], a
+	ld [wEnableBallGravityAndTilt], a
 	ld [wBallSpin], a
 	ld [wBallRotation], a
 	ld hl, wBallXVelocity
@@ -44,7 +44,7 @@ HandleBallLossGengarBonus: ; 0xdf1a
 	ret nz
 	call FillBottomMessageBufferWithBlackTile
 	call Func_30db
-	ld hl, wd5dc
+	ld hl, wScrollingText3
 	ld de, EndGengarStageText
-	call LoadTextHeader
+	call LoadScrollingText
 	ret

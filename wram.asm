@@ -40,7 +40,8 @@ wc4c0:: ; 0xc4c0
 wc4cc:: ; 0xc4cc
 	ds $34
 
-wBottomMessageText:: ; 0xc500
+wBottomMessageText:: ; 0xc500 WARNING: text loading code may break if this is moved
+; This must be aligned with $100, since there is some logic that depends on the lower byte of the address. (See LoadMonNameIntoEvolutionSelectionList)
 	ds $100
 
 wBottomMessageBuffer:: ; 0xc600
@@ -144,7 +145,9 @@ wBallTypeCounter:: ; 0xd47f
 wBallTypeBackup:: ; 0xd481
 	ds $1
 
-wd482:: ; 0xd482
+wCurBonusMultiplier:: ; 0xd482
+; Current value of the bonus multplier. Incremented from achieving various events during the game, or hitting the two bonus multiplier
+; railings. (left one first, then right one). See MAX_BONUS_MULTIPLIER
 	ds $1
 
 wd483:: ; 0xd483
@@ -175,8 +178,8 @@ wCompletedBonusStage:: ; 0xd49a
 ; Set to 1 when a bonus stage is successfully cleared.
 	ds $1
 
-wCurBonusMultiplier:: ; 0xd49b
-; Current value of the bonus multiplier. See MAX_BONUS_MULTIPLIER.
+wCurBonusMultiplierFromFieldEvents:: ; 0xd49b
+; Current value of the bonus multiplier received from field events, like catching a pokemon or hitting psyduck 3 times. See MAX_BONUS_MULTIPLIER_FIELD_EVENTS.
 	ds $1
 
 wd49c:: ; 0xd49c
@@ -194,7 +197,7 @@ wd49f:: ; 0xd49f
 wBallSaverIconOn:: ; 0xd4a1
 	ds $1
 
-wd4a2:: ; 0xd4a2
+wBallSaverFlashRate:: ; 0xd4a2
 	ds $1
 
 wBallSaverTimerFrames:: ; 0xd4a3
@@ -212,19 +215,21 @@ wBallSaverTimerFramesBackup:: ; 0xd4a6
 wBallSaverTimerSecondsBackup:: ; 0xd4a7
 	ds $1
 
-wd4a8:: ; 0xd4a8
+wNumTimesBallSavedTextWillDisplayBackup:: ; 0xd4a8
 	ds $1
 
 wd4a9:: ; 0xd4a9
 	ds $1
 
-wd4aa:: ; 0xd4aa
+wDrawBottomMessageBox:: ; 0xd4aa
+; Set to non-zero value if enable drawing the 1-tile high bottom message bar during V-Blank in normal pinball gameplay.
+; Set to 0 to disable.
 	ds $1
 
 wd4ab:: ; 0xd4ab
 	ds $1
 
-wCurrentStage:: ; 0xd4ac
+wCurrentStage:: ; 0xd4ac see constants/stage_constants.asm for list. bit 1 is 1 if the stage has flippers
 	ds $1
 
 wd4ad:: ; 0xd4ad
@@ -288,19 +293,27 @@ wWhichVoltorbId:: ; 0xd4cc
 wWhichShellderId::
 	ds $1
 
-wd4cd:: ; 0xd4cd
-	ds $3
+wVoltorb1Animation:: ; 0xd4cd
+wShellder1Animation_Unused::
+	animation wVoltorb1Animation
 
-wd4d0:: ; 0xd4d0
-	ds $3
+wVoltorb2Animation:: ; 0xd4d0
+wShellder2Animation_Unused::
+	animation wVoltorb2Animation
 
-wd4d3:: ; 0xd4d3
-	ds $3
+wVoltorb3Animation:: ; 0xd4d3
+wShellder3Animation_Unused::
+	animation wVoltorb3Animation
 
-wd4d6:: ; 0xd4d6
+wVoltorbHitAnimationDuration:: ; 0xd4d6
+wShellderHitAnimationDuration::
+; Number of frames remaining in the light-up animation when a Shellder/Voltorb is hit.
+; This single byte actually controls all three of them, since only one can be animated at a time.
 	ds $1
 
-wd4d7:: ; 0xd4d7
+wWhichAnimatedVoltorb:: ; 0xd4d7
+wWhichAnimatedShellder::
+; Hold the index (0,1,2) of the Shellder/Voltorb that is currently being animated after it was hit.
 	ds $1
 
 wWhichBumper:: ; 0xd4d8
@@ -317,44 +330,37 @@ wd4da:: ; 0xd4da
 wd4db:: ; 0xd4db
 	ds $1
 
-wPinballLaunchAlley:: ; 0xd4dc
+wPinballLaunchCollision:: ; 0xd4dc
 ; 0 = pinball isn't resting at the start, waiting to be launched by the player
 ; 1 = pinball can be launched to start the round
 ; second byte is unused, but it's written by HandleGameObjectCollision
 	ds $2
 
-wd4de:: ; 0xd4de
+wPinballLaunched:: ; 0xd4de
+; 0 = pinball hasn't been launched, yet
+; 1 = pinball was launched
 	ds $1
 
 wd4df:: ; 0xd4df
 	ds $1
 
-wd4e0:: ; 0xd4e0
+wChoseInitialMap:: ; 0xd4e0
+; Set to 1 after the player chooses the initial map during first pinball launch.
 	ds $1
 
 wInitialMapSelectionIndex:: ; 0xd4e1
 	ds $1
 
-wd4e2:: ; 0xd4e2
+wNumMapMoves:: ; 0xd4e2
+; Number of times the player has successfully completed a map move.
+; Resets to 0 after completing 6.
 	ds $1
 
-wd4e3:: ; 0xd4e3
-	ds $1
-
-wd4e4:: ; 0xd4e4
-	ds $1
-
-wd4e5:: ; 0xd4e5
-	ds $1
-
-wd4e6:: ; 0xd4e6
-	ds $1
-
-wd4e7:: ; 0xd4e7
-	ds $1
-
-wd4e8:: ; 0xd4e8
-	ds $2
+wVisitedMaps:: ; 0xd4e3
+; List of the visited maps in order.
+; It is reset after moving past Indigo Plateau.
+; The last byte is unused, since there are only 6 map moves.
+	ds $7
 
 wTriggeredGameObject:: ; 0xd4ea
 ; Game objects, such as the two bumpers, Pikachu savers, CAVE, etc. have unique ids.
@@ -367,8 +373,8 @@ wTriggeredGameObjectIndex:: ; 0xd4eb
 	ds $1
 
 wPreviousTriggeredGameObject:: ; 0xd4ec
-; Store the previous triggered game object's id, so that the pinball cant trigger
-; and object two frames in a row. It has to "un-collide" before it can collide again.
+; Store the previous triggered game object's id, so that the pinball can't trigger
+; an object two frames in a row. It has to "un-collide" before it can collide again.
 	ds $1
 
 wWhichDiglett:: ; 0xd4ed
@@ -391,28 +397,30 @@ wRightMapMoveCounter:: ; 0xd4f2
 	ds $1
 
 wLeftMapMoveDiglettAnimationCounter:: ; 0xd4f3
+wLeftMapMovePoliwagAnimationCounter::
 	ds $1
 
 wLeftMapMoveDiglettFrame:: ; 0xd4f4
+wLeftMapMovePoliwagFrame::
 	ds $1
 
 wRightMapMoveDiglettAnimationCounter:: ; 0xd4f5
+wRightMapMovePsyduckAnimationCounter::
 	ds $1
 
 wRightMapMoveDiglettFrame:: ; 0xd4f6
+wRightMapMovePsyduckFrame::
 	ds $1
 
-wd4f7:: ; 0xd4f7
-	ds $1
+wLeftMapMoveCounterFramesUntilDecrease:: ; 0xd4f7
+; Holds the number of frames remaining until the wLeftMapMoveCounter
+; counter will decrease by 1.
+	ds $2
 
-wd4f8:: ; 0xd4f8
-	ds $1
-
-wd4f9:: ; 0xd4f9
-	ds $1
-
-wd4fa:: ; 0xd4fa
-	ds $1
+wRightMapMoveCounterFramesUntilDecrease:: ; 0xd4f9
+; Holds the number of frames remaining until the wRightMapMoveCounter
+; counter will decrease by 1.
+	ds $2
 
 wBellsproutCollision:: ; 0xd4fb
 ; Second byte is set by HandleGameObjectCollision, but is unused
@@ -461,16 +469,18 @@ wWhichCAVELight:: ; 0xd50d
 wWhichCAVELightId:: ; 0xd50e
 	ds $1
 
-wd50f:: ; 0xd50f
-	ds $3
+wCAVELightStates:: ; 0xd50f
+; Marks each of the 4 CAVE lights as On (1) or Off (0).
+; When all four are On, it will do a blinking animation, and then open the Slot bonus.
+	ds $4
 
-wd512:: ; 0xd512
+wCAVELightsBlinking:: ; 0xd513
+; Set to 1 when the 4 CAVE lights are blinking for a couple seconds after successfully
+; lighting up all 4. Set to 0, otherwise.
 	ds $1
 
-wd513:: ; 0xd513
-	ds $1
-
-wd514:: ; 0xd514
+wCAVELightsBlinkingFramesRemaining:: ; 0xd514
+; Holds the number of frames remaining in the 4 CAVE lights' blinking animation.
 	ds $1
 
 wWhichPikachu:: ; 0xd515
@@ -504,29 +514,11 @@ wWhichBoardTrigger:: ; 0xd51f
 wWhichBoardTriggerId:: ; 0xd520
 	ds $1
 
-wd521:: ; 0xd521
-	ds $1
+wCollidedAlleyTriggers:: ; 0xd521
+; These bytes are pretty unnecessary, but the original code decided it would use a roundabout way to decide which function to call based on wWhichBoardTriggerId was collided with.
+	ds $8
 
-wd522:: ; 0xd522
-	ds $1
-
-wd523:: ; 0xd523
-	ds $1
-
-wd524:: ; 0xd524
-	ds $1
-
-wd525:: ; 0xd525
-	ds $1
-
-wd526:: ; 0xd526
-	ds $1
-
-wd527:: ; 0xd527
-	ds $1
-
-wd528:: ; 0xd528
-	ds $7
+	ds $6 ; free space
 
 wIndicatorStates:: ; 0xd52f
 	ds $13
@@ -546,10 +538,15 @@ wRightAlleyCount:: ; 0xd545
 wSecondaryLeftAlleyTrigger:: ; 0xd546
 	ds $2
 
-wd548:: ; 0xd548
+wPinballIsVisible:: ; 0xd548
+; Set to 1 if the pinball is visible in play.
+; Set to 0 when the pinball disappears in things like the Slot, Slowpoke, Cloyster, Bellsprout, etc.
+; When it's set to 0, it disables tilt effects on the pinball.
 	ds $1
 
-wd549:: ; 0xd549
+wEnableBallGravityAndTilt:: ; 0xd549
+; Set to 1 to enable the effect of gravity and tilt on the pinball.
+; 0 disables these forces. Used for things likes the initial pinball launch or to hold the ball stationary.
 	ds $1
 
 wCurrentMap:: ; 0xd54a
@@ -559,7 +556,7 @@ wInSpecialMode:: ; 0xd54b
 ; Set to 1 if currently in special game mode. See wSpecialMode.
 	ds $1
 
-wd54c:: ; 0xd54c
+wd54c:: ; 0xd54c 10000 sets it to c. red evo mode checks it for it's contents
 	ds $1
 
 wd54d:: ; 0xd54d
@@ -686,7 +683,7 @@ wTimerDigits:: ; 0xd582
 wd586:: ; 0xd586
 	ds $30
 
-wd5b6:: ; 0xd5b6
+wd5b6:: ; 0xd5b6 a 24 wide block starts here and is filled before catch mode
 	ds $5
 
 wWildMonIsHittable:: ; 0xd5bb
@@ -733,35 +730,47 @@ wWildMonCollision:: ; 0xd5c7
 
 	ds $1
 
-wd5ca:: ; 0xd5ca
+wd5ca:: ; 0xd5ca set to 1 by a commonly called text function that is called at the start of catch and raises the score bar. set off by text handler if no text is ready to run. Possibly toggles if text is running?
 	ds $1
 
-wd5cb:: ; 0xd5cb
+wd5cb:: ; 0xd5cb set to 0 if the above is 0 during Func_33e3
 	ds $1
 
-wd5cc:: ; 0xd5cc
-	ds $8
+scrolling_text: MACRO
+\1Enabled:: ds 1              ; Toggles if enabled. 0 is off, non-0 is on
+\1ScrollDelayCounter:: ds 1   ; Number of frames remaining until the next scroll step
+\1ScrollDelay:: ds 1          ; Number of frames between each scroll step
+\1MessageBoxOffset:: ds 1     ; Offset in wBottomMessageBuffer to place first character of text
+\1StopOffset:: ds 1           ; Offset in wBottomMessageBuffer where the scrolling text will briefly stop
+\1StopDuration:: ds 1         ; Number of frames the message will remained stopped, before resuming scroll
+\1SourceTextOffset:: ds 1     ; Offset in wBottomMessageText for the text to be displayed
+\1ScrollStepsRemaining:: ds 1 ; Number of scroll steps remaining. Isn't decremented during the stop.
+ENDM
 
-wd5d4:: ; 0xd5d4
-	ds $4
+wScrollingText1:: ; 0xd5cc
+	scrolling_text wScrollingText1
+wScrollingText2:: ; 0xd5d4
+	scrolling_text wScrollingText2
+wScrollingText3:: ; 0xd5dc
+	scrolling_text wScrollingText3
 
-wd5d8:: ; 0xd5d8
-	ds $3
+stationary_text: MACRO
+\1Enabled::ds 1              ; Toggles if enabled. 0 is off, non-0 is on
+\1MessageBoxOffset:: ds 1     ; Offset in wBottomMessageBuffer to place first character of text
+\1SourceTextOffset:: ds 1     ; Offset in wBottomMessageText for the text to be displayed
+\1Duration::
+\1DurationLowByte:: ds 1 ;how many frames to stay on screen.
+\1DurationHighByte:: ds 1 ;thiswill trigger as 0 if >= 128
+ENDM
 
-wd5db:: ; 0xd5db
-	ds $1
+wStationaryText1:: ; 0xd5e4
+	stationary_text wStationaryText1
 
-wd5dc:: ; 0xd5dc
-	ds $8
+wStationaryText2:: ; 0xd5e9
+	stationary_text wStationaryText2
 
-wd5e4:: ; 0xd5e4
-	ds $5
-
-wd5e9:: ; 0xd5e9
-	ds $5
-
-wd5ee:: ; 0xd5ee
-	ds $5
+wStationaryText3:: ; 0xd5ee
+	stationary_text wStationaryText3
 
 wCapturingMon:: ; 0xd5f3
 ; Set to 1 when the capturing animation starts.
@@ -775,16 +784,18 @@ wWhichPinballUpgradeTrigger:: ; 0xd5f7
 wWhichPinballUpgradeTriggerId:: ; 0xd5f8
 	ds $1
 
-wd5f9:: ; 0xd5f9
-	ds $2
+wBallUpgradeTriggerStates:: ; 0xd5f9
+; Marks each of the 3 ball upgrade triggers as On (1) or Off (0).
+; When all three are On, it upgrades the pinball field multiplier. (e.g. Pokeball -> Great Ball)
+	ds $3
 
-wd5fb:: ; 0xd5fb
+wBallUpgradeTriggersBlinking:: ; 0xd5fc
+; Set to 1 when the 3 ball upgrade triggers are blinking for a couple seconds after successfully
+; lighting up all 3. Set to 0, otherwise.
 	ds $1
 
-wd5fc:: ; 0xd5fc
-	ds $1
-
-wd5fd:: ; 0xd5fd
+wBallUpgradeTriggersBlinkingFramesRemaining:: ; 0xd5fd
+; Holds the number of frames remaining in the ball upgrade blinking animation.
 	ds $1
 
 wDittoSlotCollision:: ; 0xd5fe
@@ -821,10 +832,12 @@ wWhichBonusMultiplierRailing:: ; 0xd60a
 wWhichBonusMultiplierRailingId:: ; 0xd60b
 	ds $1
 
-wd60c:: ; 0xd60c
+wBonusMultiplierTensDigit:: ; 0xd60c
+; Holds the tens digit for the current bonus multiplier value. This number is displayed on the left-side bonus multiplier railing.
 	ds $1
 
-wd60d:: ; 0xd60d
+wBonusMultiplierOnesDigit:: ; 0xd60d
+; Holds the ones digit for the current bonus multiplier value. This number is displayed on the right-side bonus multiplier railing.
 	ds $1
 
 wd60e:: ; 0xd60e
@@ -1013,10 +1026,13 @@ wd64a:: ; 0xd64a
 wd64b:: ; 0xd64b
 	ds $1
 
-wd64c:: ; 0xd64c
+wBlueFieldForceFieldFrameCounter:: ; 0xd64c
+; Continuosly counts up to 60--wraps around to 0.
 	ds $1
 
-wd64d:: ; 0xd64d
+wBlueFieldForceFieldSecondsCounter:: ; 0xd64d
+; Increments once every second, based on wBlueFieldForceFieldFrameCounter.
+; When it hits 5 seconds, it wraps back to 0.
 	ds $1
 
 wd64e:: ; 0xd64e
@@ -1817,7 +1833,7 @@ wd803:: ; 0xd803
 wd804:: ; 0xd804
 	ds $1
 
-wd805:: ; 0xd805
+wd805:: ; 0xd805 enables unused and odd PlaceString
 	ds $1
 
 wd806:: ; 0xd806
@@ -1826,14 +1842,17 @@ wd806:: ; 0xd806
 wd807:: ; 0xd807
 	ds $1
 
-wd808:: ; 0xd808
+; These three bytes track different joypad states cummulatively, until they are manually cleared.
+; They inherit from their similarly-named counterparts found in hram.asm.  (See ReadJoyPad)
+wJoypadStatesPersistent:: ; 0xd808
+wJoypadStatePersistent::
+	ds $1
+wNewlyPressedButtonsPersistent:: ; 0xd809
+	ds $1
+wPressedButtonsPersistent:: ; 0xd80a
 	ds $1
 
-wd809:: ; 0xd809
-	ds $1
-
-wd80a:: ; 0xd80a
-	ds $2
+	ds $1 ; unused byte
 
 wBGP:: ; 0xd80c
 	ds $1

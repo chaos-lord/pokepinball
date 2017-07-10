@@ -32,14 +32,14 @@ HandleBallLossRedField: ; 0xdd76
 	ld a, $1
 	ld [wd4c9], a
 	xor a
-	ld [wd4de], a
+	ld [wPinballLaunched], a
 	ld [wd4df], a
 	call Func_ddfd
-	ld a, [wCurBonusMultiplier]
+	ld a, [wCurBonusMultiplierFromFieldEvents]
 	and a
 	jr z, .asm_dddd
 	dec a
-	ld [wCurBonusMultiplier], a
+	ld [wCurBonusMultiplierFromFieldEvents], a
 	ld a, $1
 	ld [wd49c], a
 	ld de, EndOfBallBonusText
@@ -81,7 +81,7 @@ Func_ddfd: ; 0xddfd
 	ld [wd604], a
 	ld a, $1e
 	ld [wd607], a
-	callba Func_10ac8
+	callba ConcludeEvolutionMode
 	jr .asm_de40
 
 .asm_de2d

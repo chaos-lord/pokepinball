@@ -877,8 +877,8 @@ Func_1894c: ; 0x1894c
 	jr z, .asm_18980
 	inc a
 	ld [wd6a5], a
-	ld a, [wd548]
-	ld hl, wd549
+	ld a, [wPinballIsVisible]
+	ld hl, wEnableBallGravityAndTilt
 	and [hl]
 	jr z, .asm_18973
 	ld a, [wBallYPos + 1]
@@ -1005,9 +1005,9 @@ Func_189af: ; 0x189af
 	ld [wCompletedBonusStage], a
 	call FillBottomMessageBufferWithBlackTile
 	call Func_30db
-	ld hl, wd5dc
+	ld hl, wScrollingText3
 	ld de, GengarStageClearedText
-	call LoadTextHeader
+	call LoadScrollingText
 	lb de, $4b, $2a
 	call PlaySoundEffect
 	ret

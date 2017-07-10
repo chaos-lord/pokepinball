@@ -1,12 +1,14 @@
+INCLUDE "text/scrolling_text.asm"
+
 Func_30db: ; 0x30db
 	ld a, $86
-	ld [hWY], a
+	ld [hWY], a ;force text bar up
 	ld a, $1
-	ld [wd5ca], a
+	ld [wd5ca], a ;place 1 in ???
 	ld [wd5cb], a
 	ret
 
-FillBottomMessageBufferWithBlackTile: ; 0x30e8
+FillBottomMessageBufferWithBlackTile: ; 0x30e8 wipes the message buffer and disables all text
 	ld a, $81
 	ld hl, wBottomMessageBuffer
 	ld b, $40
@@ -18,12 +20,12 @@ FillBottomMessageBufferWithBlackTile: ; 0x30e8
 	dec b
 	jr nz, .loop
 	xor a
-	ld [wd5cc], a
-	ld [wd5d4], a
-	ld [wd5dc], a
-	ld [wd5e4], a
-	ld [wd5e9], a
-	ld [wd5ee], a
+	ld [wScrollingText1Enabled], a
+	ld [wScrollingText2Enabled], a
+	ld [wScrollingText3Enabled], a
+	ld [wStationaryText1], a
+	ld [wStationaryText2], a
+	ld [wStationaryText3], a
 	ret
 
 Func_310a: ; 0x310a
@@ -48,20 +50,20 @@ Func_310a: ; 0x310a
 	jr nz, .asm_311d
 	ret
 
-Func_3125: ; 0x3125
+LoadMonNameIntoBottomMessageBufferList: ; 0x3125 increases address to load into by 64
 	ld b, $1
-	jr asm_312b
+	jr PlaceText
 
-Func_3129: ; 0x3129
+PlaceTextLow: ; 0x3129 disables special loads PlaceTextLow
 	ld b, $0
-asm_312b: ; 0x312b
+PlaceText: ; 0x312b loads e chars of text text into de
 	ld a, [wd805]
 	and a
-	jp nz, Func_3268
+	jp nz, UnusedPlaceString ;unused alternate place string
 .next_char
 	ld a, [hli]
 	and a
-	ret z
+	ret z ;if a = 0, jump
 	ld c, $81
 	cp " "
 	jr z, .space
@@ -86,10 +88,10 @@ asm_312b: ; 0x312b
 	cp ":"
 	jr z, .colon
 	cp "0"
-	jr c, .check_atoz
+	jr c, .check_AtoZ
 	cp "9" + 1
 	jr c, .digit
-.check_atoz
+.check_AtoZ
 	cp "A"
 	jr c, .invalid
 	cp "Z" + 1
@@ -98,65 +100,65 @@ asm_312b: ; 0x312b
 	jr .next_char
 
 .space
-	ld a, c
+	ld a, c ;$81 = space
 	jr .load_char
 
 .comma
-	inc c
+	inc c ;$82 = , , goes back a space?
 	dec e
-	jr .check_special_load
+	jr .CheckLoadHieght
 
 .male
 	xor a
-	call Func_31e1
+	call LoadSpecialTextChar
 	ld a, $83
 	jr .load_char
 
 .female
 	ld a, $1
-	call Func_31e1
+	call LoadSpecialTextChar
 	ld a, $84
 	jr .load_char
 
 .apostrophe
 	ld a, $2
-	call Func_31e1
+	call LoadSpecialTextChar
 	ld a, $85
 	jr .load_char
 
 .e_acute
 	ld a, $3
-	call Func_31e1
+	call LoadSpecialTextChar
 	ld a, $83
 	jr .load_char
 
 .asterisk
 	ld a, $4
-	call Func_31e1
+	call LoadSpecialTextChar
 	ld a, $87
 	jr .load_char
 
 .exclamation
 	ld a, $5
-	call Func_31e1
+	call LoadSpecialTextChar
 	ld a, $85
 	jr .load_char
 
 .little_x
 	ld a, $6
-	call Func_31e1
+	call LoadSpecialTextChar
 	ld a, $85
 	jr .load_char
 
 .period
 	ld a, $7
-	call Func_31e1
+	call LoadSpecialTextChar
 	ld a, $86
 	jr .load_char
 
 .colon
 	ld a, $8
-	call Func_31e1
+	call LoadSpecialTextChar
 	ld a, $83
 	jr .load_char
 
@@ -167,19 +169,19 @@ asm_312b: ; 0x312b
 .alphabet
 	add $bf
 .load_char
-	ld [de], a
-.check_special_load
+	ld [de], a ;load char into de
+.CheckLoadHieght
 	bit 0, b
-	jr nz, .no_special_load
-	set 7, e
+	jr nz, .LowLoad ;only load special if b is 1
+	set 7, e ;temporerally set 7 of e, adding  to pointer de or taking it away
 	ld a, c
 	ld [de], a
 	res 7, e
-.no_special_load
-	inc e
+.LowLoad
+	inc e ;move to next slot
 	jp .next_char
 
-Func_31e1: ; 0x31e1
+LoadSpecialTextChar: ; 0x31e1 copy special font data into VRAM based on the contents of a
 	push bc
 	push de
 	push hl
@@ -196,7 +198,7 @@ Func_31e1: ; 0x31e1
 	add c
 	ld c, a
 	ld b, $0
-	ld hl, Data_320e
+	ld hl, SpecialTextCharPointers ;special text pointers
 	add hl, bc
 	ld a, [hli]
 	ld e, a
@@ -207,66 +209,82 @@ Func_31e1: ; 0x31e1
 	ld a, [hli]
 	ld h, [hl]
 	ld l, a
-	ld a, b
+	ld a, b ;bytes taken are, in order, in e,d,a,l,h
 	ld bc, $0010
-	call LoadVRAMData
+	call LoadVRAMData ;copy 16 byte image into VRAM
 	pop hl
 	pop de
 	pop bc
 	ret
 
-Data_320e:
-	dw vTilesSH tile 3
-	dbw Bank(InGameMenuSymbolsGfx), InGameMenuSymbolsGfx + $40
-	dw vTilesSH tile 4
+SpecialTextCharPointers:
+	dw vTilesSH tile 3 ;start of special font data for LoadSpecialTextChar if DMG
+	dbw Bank(InGameMenuSymbolsGfx), InGameMenuSymbolsGfx + $40 ;bank of data, then pointer to source. each block is 5 bytes - male
+	dw vTilesSH tile 4 ; female
 	dbw Bank(InGameMenuSymbolsGfx), InGameMenuSymbolsGfx + $30
-	dw vTilesSH tile 5
-	dbw Bank(GFX_d61d0), GFX_d61d0
-	dw vTilesSH tile 3
-	dbw Bank(E_Acute_CharacterGfx), E_Acute_CharacterGfx
-	dw vTilesSH tile 7
-	dbw Bank(InGameMenuSymbolsGfx), InGameMenuSymbolsGfx + $80
-	dw vTilesSH tile 5
-	dbw Bank(GFX_d61a0), GFX_d61a0
-	dw vTilesSH tile 5
-	dbw Bank(InGameMenuSymbolsGfx), InGameMenuSymbolsGfx + $10
-	dw vTilesSH tile 6
-	dbw Bank(GFX_d61b0), GFX_d61b0
-	dw vTilesSH tile 3
-	dbw Bank(GFX_d61e0), GFX_d61e0
-	dw vTilesSH tile 3
-	dbw Bank(InGameMenuSymbolsGfx), InGameMenuSymbolsGfx + $40
-	dw vTilesSH tile 4
-	dbw Bank(InGameMenuSymbolsGfx), InGameMenuSymbolsGfx + $30
-	dw vTilesSH tile 5
-	dbw Bank(GFX_d63d0), GFX_d63d0
-	dw vTilesSH tile 3
-	dbw Bank(E_Acute_CharacterGfx_GameboyColor), E_Acute_CharacterGfx_GameboyColor
-	dw vTilesSH tile 7
-	dbw Bank(InGameMenuSymbolsGfx), InGameMenuSymbolsGfx + $80
-	dw vTilesSH tile 5
-	dbw Bank(GFX_d63a0), GFX_d63a0
-	dw vTilesSH tile 5
-	dbw Bank(InGameMenuSymbolsGfx), InGameMenuSymbolsGfx + $10
-	dw vTilesSH tile 6
-	dbw Bank(GFX_d63b0), GFX_d63b0
-	dw vTilesSH tile 3
-	dbw Bank(GFX_d63e0), GFX_d63e0
 
-Func_3268: ; 0x3268
+	dw vTilesSH tile 5 ;apostrophe
+	dbw Bank(Apostrophe_CharacterGfx), Apostrophe_CharacterGfx
+
+	dw vTilesSH tile 3 ;acute e
+	dbw Bank(E_Acute_CharacterGfx), E_Acute_CharacterGfx
+
+	dw vTilesSH tile 7 ;asterisk
+	dbw Bank(InGameMenuSymbolsGfx), InGameMenuSymbolsGfx + $80
+
+	dw vTilesSH tile 5 ;exclaiamation point
+	dbw Bank(Exclamation_Point_CharacterGfx), Exclamation_Point_CharacterGfx
+
+	dw vTilesSH tile 5 ;little x
+	dbw Bank(InGameMenuSymbolsGfx), InGameMenuSymbolsGfx + $10
+
+	dw vTilesSH tile 6 ;period
+	dbw Bank(Period_CharacterGfx), Period_CharacterGfx
+
+	dw vTilesSH tile 3 ;colon
+	dbw Bank(Colon_CharacterGfx), Colon_CharacterGfx
+
+	dw vTilesSH tile 3 ;start of special font data for LoadSpecialTextChar if DMG
+	dbw Bank(InGameMenuSymbolsGfx), InGameMenuSymbolsGfx + $40 ;male
+
+	dw vTilesSH tile 4 ;female
+	dbw Bank(InGameMenuSymbolsGfx), InGameMenuSymbolsGfx + $30
+
+	dw vTilesSH tile 5 ;apostrophe
+	dbw Bank(Apostrophe_CharacterGfx_GameboyColor), Apostrophe_CharacterGfx_GameboyColor
+
+	dw vTilesSH tile 3 ;acute e
+	dbw Bank(E_Acute_CharacterGfx_GameboyColor), E_Acute_CharacterGfx_GameboyColor
+
+	dw vTilesSH tile 7 ;asterisk
+	dbw Bank(InGameMenuSymbolsGfx), InGameMenuSymbolsGfx + $80
+
+	dw vTilesSH tile 5 ;exclaimation point
+	dbw Bank(Exclamation_Point_CharacterGfx_GameboyColor), Exclamation_Point_CharacterGfx_GameboyColor
+
+	dw vTilesSH tile 5 ;little x
+	dbw Bank(InGameMenuSymbolsGfx), InGameMenuSymbolsGfx + $10
+
+	dw vTilesSH tile 6 ;period
+	dbw Bank(Period_CharacterGfx_GameboyColor), Period_CharacterGfx_GameboyColor
+
+	dw vTilesSH tile 3 ;colon
+	dbw Bank(Colon_CharacterGfx_GameboyColor), Colon_CharacterGfx_GameboyColor
+
+UnusedPlaceString: ; 0x3268 seems to place text based on different, confusing logic, but the enabling flag is never set above 0
 	ld a, [hli]
 	and a
 	ret z
-	ld c, $81
-	cp $20
-	jr z, .asm_3297
-	cp $2c
-	jr z, .asm_329a
-	cp $30
-	jr c, .asm_327d
-	cp $3a
-	jr c, .asm_329e
-.asm_327d
+	ld c, $81 ;special space?
+	cp " "
+	jr z, .Space ;space
+	cp ","
+	jr z, .Comma ;comma
+	cp "0"
+	jr c, .Punctuation ;less than 0 is punctuation
+	cp "9" + 1
+	jr c, .Digits ;less than colon is numbers, more than is a mix of punctuation and AtoZ
+.Punctuation
 	cp $a0
 	jr c, .asm_3285
 	cp $e0
@@ -277,7 +295,7 @@ Func_3268: ; 0x3268
 	cp $f4
 	jr c, .asm_3293
 .asm_328d
-	jr Func_3268
+	jr UnusedPlaceString
 
 .asm_328f
 	sub $80
@@ -287,16 +305,16 @@ Func_3268: ; 0x3268
 	sub $50
 	jr .asm_32a0
 
-.asm_3297
+.Space
 	ld a, c
 	jr .asm_32a0
 
-.asm_329a
+.Comma
 	inc c
 	dec e
 	jr .asm_32a1
 
-.asm_329e
+.Digits
 	add $56
 .asm_32a0
 	ld [de], a
@@ -306,20 +324,20 @@ Func_3268: ; 0x3268
 	ld [de], a
 	res 7, e
 	inc e
-	jr Func_3268
+	jr UnusedPlaceString
 
-LoadTextHeader: ; 0x32aa
+LoadScrollingText: ; 0x32aa
 ; Loads scrolling text into the specified buffer.
 ; Scrolling text appears in a black bar at the bottom of the screen during pinball gameplay.
-; Input: de = pointer to scrolling text
-;        hl = pointer to text header buffer
-; Text Header Format:
+; Input: de = pointer to scrolling text data
+;        hl = pointer to scrolling text header (See wScrollingText1)
+; Scrolling text Header Format:
 ;	Byte 1: Step delay (in frames)
 ;	Byte 2: Starting wBottomMessageBuffer offset (wBottomMessageBuffer + $40 = left-most tile)
 ;	Byte 3: Stopping wBottomMessageBuffer offset (stops scrolling in the middle of the screen)
 ;	Byte 4: Number of steps to pause
 ;	Byte 5: Text offset in wBottomMessageText
-;	Byte 6: Total number of steps in the entire scolling animation
+;	Byte 6: Total number of steps in the entire scrolling animation
 ;	Remaining Bytes: Raw text to load
 	ld a, $1
 	ld [hli], a
@@ -427,51 +445,51 @@ Func_3309: ; 0x3309
 	inc de
 	ret
 
-Func_3325: ; 0x3325
-	ld a, [hli]
+HandleScrolling: ; 0x3325 activates while text is scrolling
+	ld a, [hli] ;if scrolling set to off, ret.
 	and a
 	ret z
 	ld a, [hl]
-	dec a
+	dec a ;decrement time until next scroll, if it is zero then process a scroll
 	ld [hli], a
 	ret nz
-	ld a, [hld]
+	ld a, [hld] ;reset the scroll timer
 	ld [hl], a
 	inc hl
 	inc hl
 	push hl
-	ld a, [hli]
+	ld a, [hli] ;retrieve current text start position from the struct, place in e for the PlaceText function
 	ld e, a
-	cp [hl]
+	cp [hl] ; check if in the stop position
 	inc hl
-	jr nz, .asm_333c
-	ld a, [hl]
+	jr nz, .NotInStopPosition
+	ld a, [hl] ;lower stop position timer
 	dec a
 	ld [hl], a
-	jr nz, .asm_333d
-.asm_333c
-	dec e
-.asm_333d
+	jr nz, .SkipScroll ;if stop timer not zero, prevent the scroll by setting e to the current position
+.NotInStopPosition
+	dec e ;decrement the text start position, causing the text to move 1 tile to the left
+.SkipScroll
 	push de
-	ld d, wBottomMessageBuffer / $100
+	ld d, wBottomMessageBuffer / $100 ;$c6
 	inc hl
 	push hl
-	ld l, [hl]
+	ld l, [hl] ;Retrieve text source pointer from Byte 7
 	ld h, wBottomMessageText / $100
-	call Func_3129
+	call PlaceTextLow ;load text into destination e in text RAM
 	pop hl
 	inc hl
 	ld a, [hl]
 	dec a
-	ld [hl], a
+	ld [hl], a ;dec Byte 8
 	pop de
-	pop hl
-	ld [hl], e
-	ret nz
+	pop hl ;+3
+	ld [hl], e ;restore position into var 4
+	ret nz ;if position = 0, switch scrolling off
 	dec hl
 	dec hl
 	dec hl
-	ld [hl], $0
+	ld [hl], $0 ;+0
 	ret
 
 Func_3357: ; 0x3357
@@ -566,19 +584,19 @@ Func_33a7: ; 0x33a7
 	inc de
 	ret
 
-Func_33c3: ; 0x33c3
-	ld a, [hli]
+HandleStationaryText: ; 0x33c3 Handles stationary text
+	ld a, [hli] ;+1
 	and a
-	ret z
-	ld a, [hli]
+	ret z ;ret if not enabled
+	ld a, [hli] ;load buffer offset into e
 	ld e, a
 	ld d, wBottomMessageBuffer / $100
 	push hl
-	ld l, [hl]
+	ld l, [hl] ;Place text from buffer into text
 	ld h, wBottomMessageText / $100
-	call Func_3129
+	call PlaceTextLow
 	pop hl
-	inc hl
+	inc hl ;decrement timer
 	ld a, [hl]
 	dec a
 	ld [hli], a
@@ -586,7 +604,7 @@ Func_33c3: ; 0x33c3
 	ld a, [hl]
 	dec a
 	ld [hld], a
-	bit 7, a
+	bit 7, a ;if Var5 <= 128, which is to say has not underflowed, ret, else disable text
 	ret z
 	dec hl
 	dec hl
@@ -597,71 +615,71 @@ Func_33c3: ; 0x33c3
 Func_33e3: ; 0x33e3
 	ld a, [wd5ca]
 	and a
-	jr nz, .asm_33ed
+	jr nz, .asm_33ed ;if ??? = z, load 0 into ???, else jump
 	ld [wd5cb], a
 	ret
 
 .asm_33ed
 	ld c, $0
-	ld a, [wd5cc]
+	ld a, [wScrollingText1Enabled]
 	and a
-	jr z, .asm_33fe
+	jr z, .Scrolling1Off ;if scrolling text is enabled, scroll text and inc c. repeat for each struct
 	push bc
-	ld hl, wd5cc
-	call Func_3325
+	ld hl, wScrollingText1
+	call HandleScrolling
 	pop bc
 	inc c
-.asm_33fe
-	ld a, [wd5d4]
+.Scrolling1Off
+	ld a, [wScrollingText2Enabled]
 	and a
-	jr z, .asm_340d
+	jr z, .Scrolling2Off
 	push bc
-	ld hl, wd5d4
-	call Func_3325
+	ld hl, wScrollingText2
+	call HandleScrolling
 	pop bc
 	inc c
-.asm_340d
-	ld a, [wd5dc]
+.Scrolling2Off
+	ld a, [wScrollingText3Enabled]
 	and a
-	jr z, .asm_341c
+	jr z, .Scrolling3Off
 	push bc
-	ld hl, wd5dc
-	call Func_3325
+	ld hl, wScrollingText3
+	call HandleScrolling
 	pop bc
 	inc c
-.asm_341c
-	ld a, [wd5e4]
+.Scrolling3Off
+	ld a, [wStationaryText1]
 	and a
-	jr z, .asm_342b
+	jr z, .Stationary1Off
 	push bc
-	ld hl, wd5e4
-	call Func_33c3
+	ld hl, wStationaryText1
+	call HandleStationaryText
 	pop bc
 	inc c
-.asm_342b
-	ld a, [wd5e9]
+.Stationary1Off
+	ld a, [wStationaryText2]
 	and a
-	jr z, .asm_343a
+	jr z, .Stationary2Off
 	push bc
-	ld hl, wd5e9
-	call Func_33c3
+	ld hl, wStationaryText2
+	call HandleStationaryText
 	pop bc
 	inc c
-.asm_343a
-	ld a, [wd5ee]
+.Stationary2Off
+	ld a, [wStationaryText3]
 	and a
-	jr z, .asm_3449
+	jr z, .Stationary3Off
 	push bc
-	ld hl, wd5ee
-	call Func_33c3
+	ld hl, wStationaryText3
+	call HandleStationaryText
 	pop bc
 	inc c
-.asm_3449
+.Stationary3Off
 	ld a, c
 	and a
-	ret nz
-	ld [wd5ca], a
-	call FillBottomMessageBufferWithBlackTile
+	ret nz ;if text has displayed, we are done, else
+	ld [wd5ca], a ;place 0 in ???
+	call FillBottomMessageBufferWithBlackTile ;fill with default data?
 	ld a, [hGameBoyColorFlag]
 	and a
 	jr nz, .gameboyColor
@@ -687,7 +705,7 @@ Func_3475: ; 0x3475
 	ld [hPressedButtons], a
 	call HandleTilts
 	ld a, [wCurrentStage]
-	bit 0, a
+	bit 0, a ;handle flippers if the stage has any
 	callba nz, HandleFlippers
 	callba DrawSpritesForStage
 	call Func_33e3
@@ -695,7 +713,7 @@ Func_3475: ; 0x3475
 	rst AdvanceFrame
 	ld a, [wd5ca]
 	and a
-	jr nz, Func_3475
+	jr nz, Func_3475 ;loops until wd5ca is zero
 	ret
 
 FivePoints:       ; 34a6
@@ -728,4 +746,3 @@ TenMillionPoints: ; 34f4
 	bigBCD6 000010000000
 OneHundredMillionPoints: ; 34fa
 	bigBCD6 000100000000
-

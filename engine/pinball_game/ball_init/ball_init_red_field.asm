@@ -11,7 +11,7 @@ InitBallRedField: ; 0x3007d
 	ld a, $98
 	ld [wBallYPos + 1], a
 	xor a
-	ld [wd549], a
+	ld [wEnableBallGravityAndTilt], a
 	ld [wd580], a
 	ld a, [wd7ad]
 	bit 7, a
@@ -34,14 +34,14 @@ InitBallRedField: ; 0x3007d
 	ld [wPikachuSaverSlotRewardActive], a
 	ld [wPikachuSaverCharge], a
 	ld [wd51e], a
-	ld hl, wd50f
+	ld hl, wCAVELightStates
 	ld [hli], a
 	ld [hli], a
 	ld [hli], a
 	ld [hli], a
 	ld [wLeftMapMoveCounter], a
 	ld [wRightMapMoveCounter], a
-	ld hl, wd5f9
+	ld hl, wBallUpgradeTriggerStates
 	ld [hli], a
 	ld [hli], a
 	ld [hli], a
@@ -57,12 +57,12 @@ InitBallRedField: ; 0x3007d
 	ld [wNumPikachuSaves], a
 	ld [wd613], a
 	inc a
-	ld [wd482], a
+	ld [wCurBonusMultiplier], a
 	ld [wd4ef], a
 	ld [wd4f1], a
 	ld a, $3
 	ld [wd610], a
-	callba Func_16f95
+	callba GetBCDForNextBonusMultiplier_RedField
 	ld a, $f
 	call SetSongBank
 	ld de, $0001

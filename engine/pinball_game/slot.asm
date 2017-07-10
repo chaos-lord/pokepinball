@@ -72,7 +72,7 @@ Func_ed8e: ; 0xed8e
 	ld b, a
 .asm_ee2a
 	push bc
-	call Func_eeee
+	call Delay1Frame
 	ld a, [wd61e]
 	and a
 	jr nz, .asm_ee47
@@ -181,14 +181,15 @@ SlotRewards_CallTable: ; 0xeeca
 	dw SlotRewardGoToBonusStage
 	dw SlotRewardGoToBonusStage
 
-Func_eeee: ; 0xeeee
+Delay1Frame: ; 0xeeee
+; Simply does nothing for approximately 1 frame of real time
 	push bc
 	ld bc, $0200
-.asm_eef2
+.loop
 	dec bc
 	ld a, b
 	or c
-	jr nz, .asm_eef2
+	jr nz, .loop
 	pop bc
 	ret
 
@@ -263,7 +264,7 @@ SlotRewardPikachuSaver: ; 0xef83
 	ret
 
 SlotRewardBonusMultiplier: ; 0xefa7
-	callba IncrementBonusMultiplier
+	callba IncrementBonusMultiplierFromFieldEvent
 	ret
 
 SlotRewardSmallPoints: ; 0xefb2
@@ -368,8 +369,8 @@ SlotRewardUpgradeBall: ; 0xf040
 	call FillBottomMessageBufferWithBlackTile
 	call Func_30db
 	ld de, FieldMultiplierText
-	ld hl, wd5cc
-	call LoadTextHeader
+	ld hl, wScrollingText1
+	call LoadScrollingText
 	; upgrade ball type
 	ld a, [wBallType]
 	ld c, a
@@ -393,16 +394,16 @@ SlotRewardUpgradeBall: ; 0xf040
 	push de
 	call FillBottomMessageBufferWithBlackTile
 	call Func_30db
-	ld hl, wd5d4
+	ld hl, wScrollingText2
 	ld de, DigitsText1to8
 	call Func_32cc
 	pop de
 	pop bc
-	ld hl, wd5cc
+	ld hl, wScrollingText1
 	ld de, FieldMultiplierSpecialBonusText
-	call LoadTextHeader
+	call LoadScrollingText
 .asm_f0b0
-	callba Func_155bb
+	callba TransitionPinballUpgradePalette
 	ret
 
 BallTypeProgressionBlueField: ; 0xf0bb
@@ -449,12 +450,12 @@ SlotBonusMultiplier: ; 0xf0c1
 	xor a
 	ld [wd611], a
 	ld [wd612], a
-	ld a, [wd482]
+	ld a, [wCurBonusMultiplier]
 	call .DivideBy25
 	ld b, c
 	ld a, [wCurSlotBonus]
 	inc a
-	ld hl, wd482
+	ld hl, wCurBonusMultiplier
 	add [hl]
 	cp 100
 	jr c, .asm_f113
@@ -464,11 +465,11 @@ SlotBonusMultiplier: ; 0xf0c1
 	call .DivideBy25
 	ld a, c
 	cp b
-	callba nz, IncrementBonusMultiplier
-	callba Func_16f95
-	ld a, [wd60c]
+	callba nz, IncrementBonusMultiplierFromFieldEvent
+	callba GetBCDForNextBonusMultiplier_RedField
+	ld a, [wBonusMultiplierTensDigit]
 	callba Func_f154 ; no need for BankSwitch here...
-	ld a, [wd60d]
+	ld a, [wBonusMultiplierOnesDigit]
 	add $14
 	callba Func_f154 ; no need for BankSwitch here...
 	ret
@@ -486,12 +487,12 @@ Func_f154: ; 0xf154
 	ld a, [wCurrentStage]
 	call CallInFollowingTable
 CallTable_f15a: ; 0xf15a
-	padded_dab Func_16f28
-	padded_dab Func_16f28
-	padded_dab Func_16f28
-	padded_dab Func_16f28
-	padded_dab Func_1d5f2
-	padded_dab Func_1d5f2
+	padded_dab LoadBonusMultiplierRailingGraphics_RedField
+	padded_dab LoadBonusMultiplierRailingGraphics_RedField
+	padded_dab LoadBonusMultiplierRailingGraphics_RedField
+	padded_dab LoadBonusMultiplierRailingGraphics_RedField
+	padded_dab LoadBonusMultiplierRailingGraphics_BlueField
+	padded_dab LoadBonusMultiplierRailingGraphics_BlueField
 
 SlotRewardGoToBonusStage: ; 0xf172
 	ld a, $1

@@ -1,6 +1,6 @@
 _LoadStageDataBlueFieldTop: ; 0x1c165
-	call asm_1e475
-	call Func_1cb43
+	call LoadPinballUpgradeTriggersGraphics_BlueField
+	call UpdateSpinnerChargeGraphics_BlueField
 	call Func_1c3ee
 	call Func_1e8f6
 	callba Func_142fc
@@ -15,12 +15,12 @@ _LoadStageDataBlueFieldBottom: ; 0x1c191
 	call Func_1c1db
 	call Func_1c4b6
 	call Func_1c2cb
-	call Func_1e627
+	call LoadCAVELightsGraphics_BlueField
 	call Func_1c43c
 	call Func_1c305
 	call Func_1c3ee
 	callba Func_14746
-	callba Func_14707
+	callba DrawBallSaverIcon
 	call Func_1c235
 	call Func_1c21e
 	call Func_1e8f6
@@ -51,7 +51,7 @@ Func_1c1db: ; 0x1c1db
 
 Func_1c203: ; 0x1c203
 	ld a, $ff
-	ld [wd4d7], a
+	ld [wWhichAnimatedShellder], a
 	ld [wd4db], a
 	ld a, [wBallXPos + 1]
 	ld [wd4c5], a
@@ -65,11 +65,11 @@ Func_1c21e: ; 0x1c21e
 	ld a, $ff
 	ld [wd60e], a
 	ld [wd60f], a
-	ld a, [wd60c]
-	call Func_1d5f2
-	ld a, [wd60d]
+	ld a, [wBonusMultiplierTensDigit]
+	call LoadBonusMultiplierRailingGraphics_BlueField
+	ld a, [wBonusMultiplierOnesDigit]
 	add $14
-	call Func_1d5f2
+	call LoadBonusMultiplierRailingGraphics_BlueField
 	ret
 
 Func_1c235: ; 0x1c235
@@ -86,9 +86,9 @@ Func_1c235: ; 0x1c235
 .asm_1c249
 	xor a
 .asm_1c24a
-	call Func_1de4b
+	call LoadPsyduckOrPoliwagGraphics
 	ld a, [wLeftMapMoveCounter]
-	call Func_1de6f
+	call LoadPsyduckOrPoliwagNumberGraphics
 	ld a, [hGameBoyColorFlag]
 	and a
 	jr z, .asm_1c267
@@ -106,7 +106,7 @@ Func_1c235: ; 0x1c235
 .asm_1c267
 	ld a, $8
 .asm_1c269
-	call Func_1de6f
+	call LoadPsyduckOrPoliwagNumberGraphics
 	ld a, [wRightMapMoveDiglettFrame]
 	and a
 	jr z, .asm_1c295
@@ -134,10 +134,10 @@ Func_1c235: ; 0x1c235
 .asm_1c295
 	ld a, $2
 .asm_1c297
-	call Func_1de4b
+	call LoadPsyduckOrPoliwagGraphics
 	ld a, [wRightMapMoveCounter]
 	add $4
-	call Func_1de6f
+	call LoadPsyduckOrPoliwagNumberGraphics
 	ld a, [hGameBoyColorFlag]
 	and a
 	jr z, .asm_1c2b7
@@ -155,15 +155,15 @@ Func_1c235: ; 0x1c235
 .asm_1c2b7
 	ld a, $9
 .asm_1c2b9
-	call Func_1de6f
+	call LoadPsyduckOrPoliwagNumberGraphics
 	ret
 
 .asm_1c2bd
 	ld a, $6
-	call Func_1de4b
+	call LoadPsyduckOrPoliwagGraphics
 	ld a, [wRightMapMoveCounter]
 	add $4
-	call Func_1de6f
+	call LoadPsyduckOrPoliwagNumberGraphics
 	ret
 
 Func_1c2cb: ; 0x1c2cb

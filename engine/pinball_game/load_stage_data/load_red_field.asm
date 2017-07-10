@@ -1,9 +1,9 @@
 _LoadStageDataRedFieldTop: ; 0x14000
 	call Func_14091
 	call Func_159f4
-	call Func_15450
+	call LoadPinballUpgradeTriggersGraphics_RedField
 	call Func_16859
-	call Func_14ece
+	call UpdateSpinnerChargeGraphics_RedField
 	call Func_14234
 	call Func_16425
 	call Func_142fc
@@ -14,12 +14,12 @@ _LoadStageDataRedFieldBottom: ; 0x1401c
 	call Func_14091
 	call Func_14377
 	call Func_14135
-	call Func_asm_1522d
+	call LoadCAVELightsGraphics_RedField
 	call Func_14282
 	call Func_1414b
 	call Func_14234
 	call Func_14746
-	call Func_14707
+	call DrawBallSaverIcon
 	call Func_140f9
 	call Func_16878
 	call Func_140e2
@@ -67,7 +67,7 @@ Func_1404a: ; 0x1404a
 
 Func_14091: ; 0x14091
 	ld a, $ff
-	ld [wd4d7], a
+	ld [wWhichAnimatedVoltorb], a
 	ld [wd4db], a
 	ld a, [wBallXPos + 1]
 	ld [wd4c5], a
@@ -102,11 +102,11 @@ Func_140e2: ; 0x140e2
 	ld a, $ff
 	ld [wd60e], a
 	ld [wd60f], a
-	ld a, [wd60c]
-	call Func_16f28
-	ld a, [wd60d]
+	ld a, [wBonusMultiplierTensDigit]
+	call LoadBonusMultiplierRailingGraphics_RedField
+	ld a, [wBonusMultiplierOnesDigit]
 	add $14
-	call Func_16f28
+	call LoadBonusMultiplierRailingGraphics_RedField
 	ret
 
 Func_140f9: ; 0x140f9
@@ -120,9 +120,9 @@ Func_140f9: ; 0x140f9
 	ld [wStageCollisionMap + $103], a
 	ld a, $2
 .asm_1410c
-	call Func_149d9
+	call LoadDiglettGraphics
 	ld a, [wLeftMapMoveCounter]
-	call Func_149f5
+	call LoadDiglettNumberGraphics
 	ld a, [wd4f1]
 	and a
 	jr z, .asm_14127
@@ -133,10 +133,10 @@ Func_140f9: ; 0x140f9
 	ld a, $2
 .asm_14127
 	add $3
-	call Func_149d9
+	call LoadDiglettGraphics
 	ld a, [wRightMapMoveCounter]
 	add $4
-	call Func_149f5
+	call LoadDiglettNumberGraphics
 	ret
 
 Func_14135: ; 0x14135

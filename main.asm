@@ -118,9 +118,9 @@ Func_dc6d: ; 0xdc6d
 	push de
 	call FillBottomMessageBufferWithBlackTile
 	call Func_30db
-	ld hl, wd5dc
+	ld hl, wScrollingText3
 	pop de
-	call LoadTextHeader
+	call LoadScrollingText
 	ret
 
 Func_dc7c: ; 0xdc7c
@@ -186,13 +186,13 @@ SECTION "bank4", ROMX
 
 Func_10000: ; 0x10000
 	ld c, a
-	ld a, [wInSpecialMode]
+	ld a, [wInSpecialMode] ;special mode in c
 	and a
-	ret z
+	ret z ;if mot in special mode, ret
 	ld a, c
 	ld [wd54c], a
 	ld a, [wSpecialMode]
-	cp SPECIAL_MODE_CATCHEM
+	cp SPECIAL_MODE_CATCHEM ;branch based on mode
 	jp z, Func_10a95
 	cp SPECIAL_MODE_EVOLUTION
 	jr nz, .next
@@ -223,21 +223,21 @@ PointerTable_10a9b: ; 0x10a9b
 	padded_dab Func_20bae ; STAGE_BLUE_FIELD_TOP
 	padded_dab Func_20bae ; STAGE_BLUE_FIELD_BOTTOM
 
-Func_10ab3: ; 0x10ab3
+StartEvolutionMode: ; 0x10ab3
 	ld a, [wInSpecialMode]
 	and a
 	ret nz
 	ld a, [wCurrentStage]
 	rst JumpTable  ; calls JumpToFuncInTable
-CallTable_10abc: ; 0x10abc
-	dw Func_10ebb ; STAGE_RED_FIELD_TOP
-	dw Func_10ebb ; STAGE_RED_FIELD_BOTTOM
-	dw Func_11054
-	dw Func_11054
-	dw Func_11061 ; STAGE_BLUE_FIELD_TOP
-	dw Func_11061 ; STAGE_BLUE_FIELD_BOTTOM
+StartEvolutionMode_CallTable: ; 0x10abc
+	dw StartEvolutionMode_RedField ; STAGE_RED_FIELD_TOP
+	dw StartEvolutionMode_RedField ; STAGE_RED_FIELD_BOTTOM
+	dw StartEvolutionMode_UnusedField
+	dw StartEvolutionMode_UnusedField
+	dw StartEvolutionMode_BlueField ; STAGE_BLUE_FIELD_TOP
+	dw StartEvolutionMode_BlueField ; STAGE_BLUE_FIELD_BOTTOM
 
-Func_10ac8: ; 0x10ac8
+ConcludeEvolutionMode: ; 0x10ac8
 	xor a
 	ld [wd5ca], a
 	call FillBottomMessageBufferWithBlackTile
@@ -252,13 +252,13 @@ Func_10ac8: ; 0x10ac8
 	callba StopTimer
 	ld a, [wCurrentStage]
 	rst JumpTable  ; calls JumpToFuncInTable
-CallTable_10af3: ; 0x10af3
-	dw Func_10fe3 ; STAGE_RED_FIELD_TOP
-	dw Func_10fe3 ; STAGE_RED_FIELD_BOTTOM
-	dw Func_11060
-	dw Func_11060
-	dw Func_11195 ; STAGE_BLUE_FIELD_TOP
-	dw Func_11195 ; STAGE_BLUE_FIELD_TOP
+ConcludeEvolutionMode_CallTable: ; 0x10af3
+	dw ConcludeEvolutionMode_RedField ; STAGE_RED_FIELD_TOP
+	dw ConcludeEvolutionMode_RedField ; STAGE_RED_FIELD_BOTTOM
+	dw DoNothing_11060
+	dw DoNothing_11060
+	dw ConcludeEvolutionMode_BlueField ; STAGE_BLUE_FIELD_TOP
+	dw ConcludeEvolutionMode_BlueField ; STAGE_BLUE_FIELD_TOP
 
 Func_10aff: ; 0x10aff
 	ld a, [wCurrentStage]
@@ -307,31 +307,32 @@ VideoData_10b2a: ; 0x10b2a
 Func_10b3f: ; 0x10b3f
 	call FillBottomMessageBufferWithBlackTile
 	call Func_30db
-	ld hl, wd5cc
+	ld hl, wScrollingText1
 	ld a, [wCurrentEvolutionType]
 	cp EVO_EXPERIENCE
 	ld de, StartTrainingText
 	jr z, .asm_10b55
 	ld de, FindItemsText
 .asm_10b55
-	call LoadTextHeader
+	call LoadScrollingText
 	ret
 
-Func_10b59: ; 0x10b59
+InitEvolutionSelectionMenu: ; 0x10b59
+; Initializes the list menu, which the player uses to select which pokemon to evolve.
 	xor a
-	ld [wd4aa], a
+	ld [wDrawBottomMessageBox], a
 	ld hl, wBottomMessageText
 	ld a, $81
 	ld b, $30
-.asm_10b64
-	ld [hli], a
+.clearLoop
+	ld [hli], a ; load spaces into bottom text. repeat 192 times
 	ld [hli], a
 	ld [hli], a
 	ld [hli], a
 	dec b
-	jr nz, .asm_10b64
+	jr nz, .clearLoop
 	ld hl, wPartyMons
-	call Func_10b8e
+	call LoadMonNamesIntoEvolutionSelectionList
 	ld a, BANK(InGameMenuSymbolsGfx)
 	ld hl, InGameMenuSymbolsGfx + $50
 	ld de, vTilesSH tile $08
@@ -344,33 +345,38 @@ Func_10b59: ; 0x10b59
 	call LoadVRAMData
 	ret
 
-Func_10b8e: ; 0x10b8e
+LoadMonNamesIntoEvolutionSelectionList: ; 0x10b8e
+; Loads 6 pokemon names into the list that allows the player to select which pokemon to evolve.
+; Input: hl = pointer to a list of pokemon ids. (an offset of wPartyMons)
 	ld a, [wNumPartyMons]
 	ld c, $0
 	ld b, a
-.asm_10b94
+.loop
 	ld a, [hli]
-	call Func_10ba2
+	call LoadMonNameIntoEvolutionSelectionList
 	inc c
 	ld a, c
 	cp $6
-	jr z, .asm_10ba1
+	jr z, .done
 	dec b
-	jr nz, .asm_10b94
-.asm_10ba1
+	jr nz, .loop
+.done
 	ret
 
-Func_10ba2: ; 0x10ba2
+LoadMonNameIntoEvolutionSelectionList: ; 0x10ba2
+; Loads a single pokemon name into the list of pokemon to evolve.
+; Input: c = index of the list
+;        a = pokemon id
 	push bc
 	push hl
-	swap c
+	swap c ;c* 32, does wird things if c starts >15
 	sla c
 	ld b, $0
 	ld hl, wBottomMessageText
-	add hl, bc
+	add hl, bc ;goes down text as many times as new c
 	ld d, h
 	ld e, l
-	ld c, a
+	ld c, a ;c now equals paerty mon, HL stored in de
 	ld b, $0
 	sla c
 	rl b
@@ -379,8 +385,8 @@ Func_10ba2: ; 0x10ba2
 	sla c
 	rl b
 	sla c
-	rl b
-	ld hl, PokemonNames
+	rl b ;multiplies party mon by 16, then jumps to correct name in the table
+	ld hl, PokemonNames ;names are 16 chars long
 	add hl, bc
 	ld a, $81
 	ld [de], a
@@ -392,69 +398,72 @@ Func_10ba2: ; 0x10ba2
 	ld [de], a
 	inc de
 	ld a, $81
-	ld [de], a
+	ld [de], a ; loaded 4 spaces into de
 	inc de
-	call Func_3125
-.asm_10bda
+	call LoadMonNameIntoBottomMessageBufferList
+.loadBlankCharacterLoop
 	ld a, e
 	and $1f
 	cp $14
-	jr nc, .asm_10be7
+	jr nc, .done
 	ld a, $81
 	ld [de], a
 	inc de
-	jr .asm_10bda
+	jr .loadBlankCharacterLoop
 
-.asm_10be7
+.done
 	pop hl
 	pop bc
 	ret
 
-Func_10bea: ; 0x10bea
+SelectPokemonToEvolveMenu: ; 0x10bea
+; Drivers the menu that allows the player to select a pokemon to evolve.
 	xor a
 	ld [wCurSelectedPartyMon], a
 	ld [wCurSelectedPartyMonScrollOffset], a
 	ld [wPartySelectionCursorCounter], a
-.asm_10bf4
-	call Func_10c0c
-	call Func_b2e
-	call Func_10c38
+.loop
+	call MoveEvolutionSelectionCursor
+	call ClearPersistentJoypadStates
+	call UpdateEvolutionSelectionList
 	rst AdvanceFrame
-	ld a, [wd809]
-	bit 0, a
-	jr z, .asm_10bf4
+	ld a, [wNewlyPressedButtonsPersistent]
+	bit BIT_A_BUTTON, a
+	jr z, .loop
 	lb de, $00, $01
 	call PlaySoundEffect
 	ret
 
-Func_10c0c: ; 0x10c0c
-	ld a, [wd80a]
+MoveEvolutionSelectionCursor: ; 0x10c0c
+	ld a, [wPressedButtonsPersistent]
 	ld b, a
 	ld a, [wNumPartyMons]
 	ld c, a
 	ld a, [wCurSelectedPartyMon]
-	bit 6, b
-	jr z, .asm_10c28
+	bit BIT_D_UP, b
+	jr z, .didntPressUp
 	and a
 	ret z
+	; move the cursor up
 	dec a
 	ld [wCurSelectedPartyMon], a
 	lb de, $00, $03
 	call PlaySoundEffect
 	ret
 
-.asm_10c28
-	bit 7, b
+.didntPressUp
+	bit BIT_D_DOWN, b
 	ret z
 	inc a
 	cp c
 	ret z
+	; move the cursor down
 	ld [wCurSelectedPartyMon], a
 	lb de, $00, $03
 	call PlaySoundEffect
 	ret
 
-Func_10c38: ; 0x10c38
+UpdateEvolutionSelectionList: ; 0x10c38
 	ld a, [wCurSelectedPartyMon]
 	ld hl, wCurSelectedPartyMonScrollOffset
 	sub [hl]
@@ -476,7 +485,7 @@ Func_10c38: ; 0x10c38
 	ld b, $0
 	ld hl, wPartyMons
 	add hl, bc
-	call Func_10b8e
+	call LoadMonNamesIntoEvolutionSelectionList
 	ld a, [hJoypadState]
 	and a
 	ld a, [wPartySelectionCursorCounter]
@@ -519,7 +528,7 @@ Func_10c38: ; 0x10c38
 	call LoadVRAMData
 	ret
 
-Func_10ca5: ; 0x10ca5
+PlaceEvolutionInParty: ; 0x10ca5
 	ld a, [wCurSelectedPartyMon]
 	ld c, a
 	ld b, $0
@@ -534,16 +543,16 @@ Func_10ca5: ; 0x10ca5
 	ld [wCaughtFlag], a
 	ret
 
-Func_10cb7: ; 0x10cb7
+SelectPokemonToEvolve: ; 0x10cb7
 	call FillBottomMessageBufferWithBlackTile
-	call Func_10b59
+	call InitEvolutionSelectionMenu
 	ld a, $60
 	ld [hWY], a
 	dec a
 	ld [hLYC], a
 	ld a, $fd
 	ld [hLCDCMask], a
-	call Func_10bea
+	call SelectPokemonToEvolveMenu
 	ld a, $86
 	ld [hWY], a
 	ld a, $83
@@ -553,7 +562,7 @@ Func_10cb7: ; 0x10cb7
 	ld [hLCDCMask], a
 	ld a, [hGameBoyColorFlag]
 	and a
-	jr nz, .asm_10cee
+	jr nz, .gameboyColor
 	ld a, BANK(StageRedFieldTopStatusBarSymbolsGfx_GameBoy)
 	ld hl, StageRedFieldTopStatusBarSymbolsGfx_GameBoy + $80
 	ld de, vTilesSH tile $08
@@ -561,7 +570,7 @@ Func_10cb7: ; 0x10cb7
 	call LoadVRAMData
 	jr .asm_10cfc
 
-.asm_10cee
+.gameboyColor
 	ld a, BANK(StageRedFieldTopStatusBarSymbolsGfx_GameBoyColor)
 	ld hl, StageRedFieldTopStatusBarSymbolsGfx_GameBoyColor + $80
 	ld de, vTilesSH tile $08
@@ -570,7 +579,7 @@ Func_10cb7: ; 0x10cb7
 .asm_10cfc
 	call FillBottomMessageBufferWithBlackTile
 	ld a, SPECIAL_MODE_CATCHEM
-	ld [wd4aa], a
+	ld [wDrawBottomMessageBox], a
 	ld [wInSpecialMode], a
 	ld [wSpecialMode], a
 	xor a
@@ -584,7 +593,7 @@ Func_10cb7: ; 0x10cb7
 	ld [wCurrentCatchEmMon], a
 	ret
 
-Func_10d1d: ; 0x10d1d
+InitEvolutionModeForMon: ; 0x10d1d
 	ld hl, wd586
 	ld b, $18
 .asm_10d22
@@ -757,12 +766,12 @@ Func_10e0a: ; 0x10e0a
 	push de
 	call FillBottomMessageBufferWithBlackTile
 	call Func_30db
-	ld hl, wd5cc
+	ld hl, wScrollingText1
 	pop de
-	call LoadTextHeader
-	ld hl, wd5d4
+	call LoadScrollingText
+	ld hl, wScrollingText2
 	pop de
-	call LoadTextHeader
+	call LoadScrollingText
 	pop hl
 	ld de, wBottomMessageText + $20
 	ld b, $0
@@ -781,16 +790,16 @@ Func_10e0a: ; 0x10e0a
 	inc de
 	xor a
 	ld [de], a
-	ld a, [wd5db]
+	ld a, [wScrollingText2ScrollStepsRemaining]
 	add b
-	ld [wd5db], a
+	ld [wScrollingText2ScrollStepsRemaining], a
 	ld a, $14
 	sub b
 	srl a
 	ld b, a
-	ld a, [wd5d8]
+	ld a, [wScrollingText2StopOffset]
 	add b
-	ld [wd5d8], a
+	ld [wScrollingText2StopOffset], a
 	ret
 
 Func_10e8b: ; 0x10e8b
@@ -802,22 +811,22 @@ Func_10e8b: ; 0x10e8b
 	push de
 	call FillBottomMessageBufferWithBlackTile
 	call Func_30db
-	ld hl, wd5d4
+	ld hl, wScrollingText2
 	ld de, Data_2b6b
 	call Func_32cc
 	pop de
 	pop bc
-	ld hl, wd5cc
+	ld hl, wScrollingText1
 	ld de, EvolutionSpecialBonusText
-	call LoadTextHeader
+	call LoadScrollingText
 	ret
 
-Func_10ebb: ; 0x10ebb
+StartEvolutionMode_RedField: ; 0x10ebb
 	ld a, [wNumPartyMons]
 	and a
 	ret z
-	call Func_10cb7
-	call Func_10d1d
+	call SelectPokemonToEvolve
+	call InitEvolutionModeForMon
 	ld a, [wd555]
 	sub $2
 	ld c, a
@@ -829,12 +838,12 @@ Func_10ebb: ; 0x10ebb
 	ld l, a
 	ld de, wIndicatorStates
 	ld b, $13
-.asm_10eda
+.loop
 	ld a, [hli]
 	ld [de], a
 	inc de
 	dec b
-	jr nz, .asm_10eda
+	jr nz, .loop
 	xor a
 	ld [wLeftAlleyCount], a
 	call Func_107b0
@@ -900,8 +909,8 @@ IndicatorStates_10fbd:  ; 0x10fbd
 IndicatorStates_10fd0:  ; 0x10fd0
 	db $00, $00, $80, $80, $00, $00, $01, $01, $01, $01, $01, $01, $01, $01, $01, $00, $00, $00, $00
 
-Func_10fe3: ; 0x10fe3
-	call Func_107a5
+ConcludeEvolutionMode_RedField: ; 0x10fe3
+	call ResetIndicatorStates
 	call Func_107c2
 	call Func_107c8
 	call Func_107e9
@@ -935,23 +944,23 @@ Func_10fe3: ; 0x10fe3
 	call Func_10aa
 	ret
 
-Func_11054: ; 0x11054
+StartEvolutionMode_UnusedField: ; 0x11054
 	ld a, [wNumPartyMons]
 	and a
 	ret z
-	call Func_10cb7
-	call Func_10d1d
+	call SelectPokemonToEvolve
+	call InitEvolutionModeForMon
 	ret
 
-Func_11060: ; 0x11060
+DoNothing_11060: ; 0x11060
 	ret
 
-Func_11061: ; 0x11061
+StartEvolutionMode_BlueField: ; 0x11061
 	ld a, [wNumPartyMons]
 	and a
 	ret z
-	call Func_10cb7
-	call Func_10d1d
+	call SelectPokemonToEvolve
+	call InitEvolutionModeForMon
 	ld a, $1
 	ld [wd643], a
 	ld a, [wd555]
@@ -1036,10 +1045,10 @@ IndicatorStates_1116f: ; 0x1116f
 IndicatorStates_11182: ; 0x11182
 	db $80, $00, $80, $80, $00, $00, $01, $01, $01, $01, $01, $01, $01, $01, $01, $00, $00, $00, $00
 
-Func_11195: ; 0x11195
+ConcludeEvolutionMode_BlueField: ; 0x11195
 	xor a
 	ld [wd643], a
-	call Func_107a5
+	call ResetIndicatorStates
 	call Func_107c2
 	callba Func_1f2ff
 	ld a, [wCurrentStage]
@@ -1130,6 +1139,7 @@ INCLUDE "data/mon_names.asm"
 INCLUDE "data/mon_initial_indicator_states.asm"
 
 Data_1298b: ; 0x1298b
+; This has to do with which indicators will need to be hit to evolve the pokemon.
 	db $01  ; BULBASAUR
 	db $02  ; IVYSAUR
 	db $03  ; VENUSAUR
@@ -1493,11 +1503,11 @@ CallTable_3021f: ; 0x3021f
 
 Func_3022b: ; 0x3022b
 	xor a
-	ld [wd5ca], a
-	call FillBottomMessageBufferWithBlackTile
+	ld [wd5ca], a ;turn text off
+	call FillBottomMessageBufferWithBlackTile ;clear text
 	xor a
 	ld [wInSpecialMode], a
-	ld [wSpecialMode], a
+	ld [wSpecialMode], a ;no longer in special modes
 	callba StopTimer
 	ld a, [wCurrentStage]
 	rst JumpTable  ; calls JumpToFuncInTable
@@ -1511,7 +1521,9 @@ CallTable_30247: ; 0x30247
 
 INCLUDE "engine/pinball_game/billboard_tiledata.asm"
 
-Func_3118f: ; 0x3118f
+LoadScrollingMapNameText: ; 0x3118f
+; Loads the scrolling message that displays the current map's name.
+; Input: bc = pointer to prefix scrolling text
 	push bc
 	call FillBottomMessageBufferWithBlackTile
 	call Func_30db
@@ -1525,11 +1537,11 @@ Func_3118f: ; 0x3118f
 	ld e, a
 	ld a, [hli]
 	ld d, a
-	ld hl, wd5d4
-	call LoadTextHeader
+	ld hl, wScrollingText2
+	call LoadScrollingText
 	pop de
-	ld hl, wd5cc
-	call LoadTextHeader
+	ld hl, wScrollingText1
+	call LoadScrollingText
 	ret
 
 Func_311b4: ; 0x311b4
@@ -1557,9 +1569,9 @@ Func_311b4: ; 0x311b4
 
 .asm_311e2
 	ld a, $2
-	callba Func_149d9
+	callba LoadDiglettGraphics
 	ld a, $5
-	callba Func_149d9
+	callba LoadDiglettGraphics
 	ld a, $6a
 	ld [wStageCollisionMap + $f0], a
 	ld a, $6b
@@ -1580,7 +1592,7 @@ Func_311b4: ; 0x311b4
 	ret
 
 Func_31234: ; 0x31234
-	callba Func_107a5
+	callba ResetIndicatorStates
 	callba Func_107c2
 	callba Func_107c8
 	callba Func_107e9
@@ -1592,64 +1604,66 @@ Func_31234: ; 0x31234
 	callba LoadMapBillboardTileData
 	ret
 
-Func_31281: ; 0x31282
-	ld a, [wd4e2]
+ChooseNextMap_RedField: ; 0x31282
+; Picks the next map to perform a map move.
+; Also records which maps have been visited.
+	ld a, [wNumMapMoves]
 	inc a
 	cp $6
-	jr c, .asm_3129e
+	jr c, .dontReset
 	ld a, $ff
-	ld [wd4e3], a
-	ld [wd4e4], a
-	ld [wd4e5], a
-	ld [wd4e6], a
-	ld [wd4e7], a
-	ld [wd4e8], a
+	ld [wVisitedMaps], a
+	ld [wVisitedMaps + 1], a
+	ld [wVisitedMaps + 2], a
+	ld [wVisitedMaps + 3], a
+	ld [wVisitedMaps + 4], a
+	ld [wVisitedMaps + 5], a
 	xor a
-.asm_3129e
-	ld [wd4e2], a
+.dontReset
+	ld [wNumMapMoves], a
 	cp $3
-	jr c, .chooseFirstMapMoveIndex
+	jr c, .chooseMapFromArea1
 	cp $5
-	jr c, .chooseSecondMapMoveIndex
+	jr c, .chooseMapFromArea2
 	ld a, INDIGO_PLATEAU
 	ld [wCurrentMap], a
-	ld [wd4e8], a
+	ld [wVisitedMaps + 5], a
 	ret
 
-.chooseFirstMapMoveIndex
+.chooseMapFromArea1
 	call GenRandom
 	and $7
 	cp $7
-	jr nc, .chooseFirstMapMoveIndex
+	jr nc, .chooseMapFromArea1
 	ld c, a
 	ld b, $0
 	ld hl, FirstMapMoveSet_RedField
 	add hl, bc
 	ld c, [hl]
-	ld hl, wd4e3
-	ld a, [wd4e2]
+	ld hl, wVisitedMaps
+	ld a, [wNumMapMoves]
 	and a
 	jr z, .asm_312d4
 	ld b, a
 .asm_312cd
 	ld a, [hli]
 	cp c
-	jr z, .chooseFirstMapMoveIndex
+	jr z, .chooseMapFromArea1
 	dec b
 	jr nz, .asm_312cd
 .asm_312d4
 	ld a, c
 	ld [wCurrentMap], a
-	ld a, [wd4e2]
+	ld a, [wNumMapMoves]
 	ld c, a
 	ld b, $0
-	ld hl, wd4e3
+	ld hl, wVisitedMaps
 	add hl, bc
 	ld a, [wCurrentMap]
 	ld [hl], a
 	ret
 
-.chooseSecondMapMoveIndex
+.chooseMapFromArea2
 	call GenRandom
 	and $3
 	ld c, a
@@ -1657,24 +1671,24 @@ Func_31281: ; 0x31282
 	ld hl, SecondMapMoveSet_RedField
 	add hl, bc
 	ld c, [hl]
-	ld hl, wd4e6
-	ld a, [wd4e2]
+	ld hl, wVisitedMaps + 3
+	ld a, [wNumMapMoves]
 	sub $3
 	jr z, .asm_31306
 	ld b, a
 .asm_312ff
 	ld a, [hli]
 	cp c
-	jr z, .chooseSecondMapMoveIndex
+	jr z, .chooseMapFromArea2
 	dec b
 	jr nz, .asm_312ff
 .asm_31306
 	ld a, c
 	ld [wCurrentMap], a
-	ld a, [wd4e2]
+	ld a, [wNumMapMoves]
 	ld c, a
 	ld b, $0
-	ld hl, wd4e3
+	ld hl, wVisitedMaps
 	add hl, bc
 	ld a, [wCurrentMap]
 	ld [hl], a
@@ -1713,7 +1727,7 @@ Func_31326: ; 0x31326
 	ld [wIndicatorStates + 3], a
 	ld [wIndicatorStates + 4], a
 	ld a, $3
-	callba Func_1de4b
+	callba LoadPsyduckOrPoliwagGraphics
 	jr .asm_31382
 
 .asm_3134c
@@ -1725,11 +1739,11 @@ Func_31326: ; 0x31326
 	ld [wIndicatorStates + 2], a
 	ld [wIndicatorStates + 4], a
 	ld a, $1
-	callba Func_1de4b
+	callba LoadPsyduckOrPoliwagGraphics
 	ld a, $6
-	callba Func_1de4b
+	callba LoadPsyduckOrPoliwagGraphics
 	ld a, $7
-	callba Func_1de6f
+	callba LoadPsyduckOrPoliwagNumberGraphics
 .asm_31382
 	ld a, [wCurrentStage]
 	bit 0, a
@@ -1755,7 +1769,7 @@ Func_31326: ; 0x31326
 	ret
 
 Func_313c3: ; 0x313c3
-	callba Func_107a5
+	callba ResetIndicatorStates
 	callba Func_107c2
 	callba Func_1f2ff
 	ld a, $0
@@ -1768,64 +1782,66 @@ Func_313c3: ; 0x313c3
 	callba LoadMapBillboardTileData
 	ret
 
-Func_3140b: ; 0x3140b
-	ld a, [wd4e2]
+ChooseNextMap_BlueField: ; 0x3140b
+; Picks the next map to perform a map move.
+; Also records which maps have been visited.
+	ld a, [wNumMapMoves]
 	inc a
 	cp $6
-	jr c, .asm_31428
+	jr c, .dontReset
 	ld a, $ff
-	ld [wd4e3], a
-	ld [wd4e4], a
-	ld [wd4e5], a
-	ld [wd4e6], a
-	ld [wd4e7], a
-	ld [wd4e8], a
+	ld [wVisitedMaps], a
+	ld [wVisitedMaps + 1], a
+	ld [wVisitedMaps + 2], a
+	ld [wVisitedMaps + 3], a
+	ld [wVisitedMaps + 4], a
+	ld [wVisitedMaps + 5], a
 	xor a
-.asm_31428
-	ld [wd4e2], a
+.dontReset
+	ld [wNumMapMoves], a
 	cp $3
-	jr c, .asm_3143c
+	jr c, .chooseMapFromArea1
 	cp $5
-	jr c, .asm_31471
+	jr c, .chooseMapFromArea2
 	ld a, INDIGO_PLATEAU
 	ld [wCurrentMap], a
-	ld [wd4e8], a
+	ld [wVisitedMaps + 5], a
 	ret
 
-.asm_3143c
+.chooseMapFromArea1
 	call GenRandom
 	and $7
 	cp $7
-	jr nc, .asm_3143c
+	jr nc, .chooseMapFromArea1
 	ld c, a
 	ld b, $0
 	ld hl, FirstMapMoveSet_BlueField
 	add hl, bc
 	ld c, [hl]
-	ld hl, wd4e3
-	ld a, [wd4e2]
+	ld hl, wVisitedMaps
+	ld a, [wNumMapMoves]
 	and a
 	jr z, .asm_3145e
 	ld b, a
 .asm_31457
 	ld a, [hli]
 	cp c
-	jr z, .asm_3143c
+	jr z, .chooseMapFromArea1
 	dec b
 	jr nz, .asm_31457
 .asm_3145e
 	ld a, c
 	ld [wCurrentMap], a
-	ld a, [wd4e2]
+	ld a, [wNumMapMoves]
 	ld c, a
 	ld b, $0
-	ld hl, wd4e3
+	ld hl, wVisitedMaps
 	add hl, bc
 	ld a, [wCurrentMap]
 	ld [hl], a
 	ret
 
-.asm_31471
+.chooseMapFromArea2
 	call GenRandom
 	and $3
 	ld c, a
@@ -1833,24 +1849,24 @@ Func_3140b: ; 0x3140b
 	ld hl, SecondMapMoveSet_BlueField
 	add hl, bc
 	ld c, [hl]
-	ld hl, wd4e6
-	ld a, [wd4e2]
+	ld hl, wVisitedMaps + 3
+	ld a, [wNumMapMoves]
 	sub $3
 	jr z, .asm_31490
 	ld b, a
 .asm_31489
 	ld a, [hli]
 	cp c
-	jr z, .asm_31471
+	jr z, .chooseMapFromArea2
 	dec b
 	jr nz, .asm_31489
 .asm_31490
 	ld a, c
 	ld [wCurrentMap], a
-	ld a, [wd4e2]
+	ld a, [wNumMapMoves]
 	ld c, a
 	ld b, $0
-	ld hl, wd4e3
+	ld hl, wVisitedMaps
 	add hl, bc
 	ld a, [wCurrentMap]
 	ld [hl], a
@@ -1957,9 +1973,9 @@ Func_3151f: ; 0x3151f
 	callba StopTimer
 	call FillBottomMessageBufferWithBlackTile
 	call Func_30db
-	ld hl, wd5cc
+	ld hl, wScrollingText1
 	ld de, MapMoveFailedText
-	call LoadTextHeader
+	call LoadScrollingText
 	ret
 
 Func_31591: ; 0x31591
@@ -2004,12 +2020,12 @@ Func_315d5: ; 0x315d5
 	ld de, $0000
 	call PlaySong
 	rst AdvanceFrame
-	callba Func_31281
+	callba ChooseNextMap_RedField
 	callba LoadMapBillboardTileData
 	lb de, $25, $25
 	call PlaySoundEffect
 	ld bc, ArrivedAtMapText
-	callba Func_3118f
+	callba LoadScrollingMapNameText
 .asm_31603
 	callba Func_33e3
 	rst AdvanceFrame
@@ -2068,7 +2084,7 @@ Func_31660: ; 0x31660
 	ret
 
 Func_31672: ; 0x31672
-	ld a, [wd5ca]
+	ld a, [wd5ca] ;if text is off
 	and a
 	ret nz
 	call FillBottomMessageBufferWithBlackTile
@@ -2111,9 +2127,9 @@ Func_3168c: ; 0x3168c
 	callba StopTimer
 	call FillBottomMessageBufferWithBlackTile
 	call Func_30db
-	ld hl, wd5cc
+	ld hl, wScrollingText1
 	ld de, MapMoveFailedText
-	call LoadTextHeader
+	call LoadScrollingText
 	ret
 
 Func_31708: ; 0x31708
@@ -2158,12 +2174,12 @@ Func_3174c: ; 0x3174c
 	ld de, $0000
 	call PlaySong
 	rst AdvanceFrame
-	callba Func_3140b
+	callba ChooseNextMap_BlueField
 	callba LoadMapBillboardTileData
 	lb de, $25, $25
 	call PlaySoundEffect
 	ld bc, ArrivedAtMapText
-	callba Func_3118f
+	callba LoadScrollingMapNameText
 .asm_3177a
 	callba Func_33e3
 	rst AdvanceFrame
@@ -3070,22 +3086,22 @@ SeelBonusTilemap2_GameBoyColor: ; 0xd5c00
 Alphabet1Gfx: ; 0xd6000
 	INCBIN "gfx/stage/alphabet_1.2bpp"
 
-GFX_d61a0: INCBIN "gfx/unknown/d61a0.2bpp"
-GFX_d61b0: INCBIN "gfx/unknown/d61b0.2bpp"
+Exclamation_Point_CharacterGfx: INCBIN "gfx/stage/exclamation_point_mono.2bpp" ;DMG excalamation point
+Period_CharacterGfx: INCBIN "gfx/stage/period_mono.2bpp" ;DMG period
 E_Acute_CharacterGfx: INCBIN "gfx/stage/e_acute_mono.2bpp"
-GFX_d61d0: INCBIN "gfx/unknown/d61d0.2bpp"
-GFX_d61e0: INCBIN "gfx/unknown/d61e0.2bpp"
+Apostrophe_CharacterGfx: INCBIN "gfx/stage/apostrophe_mono.2bpp" ;DMG apostrophe
+Colon_CharacterGfx: INCBIN "gfx/stage/colon_mono.2bpp" ;DMG colon
 
 SECTION "bank35.5", ROMX
 
 Alphabet2Gfx: ; 0xd6200
 	INCBIN "gfx/stage/alphabet_2.2bpp"
 
-GFX_d63a0: INCBIN "gfx/unknown/d63a0.2bpp"
-GFX_d63b0: INCBIN "gfx/unknown/d63b0.2bpp"
+Exclamation_Point_CharacterGfx_GameboyColor: INCBIN "gfx/stage/exclamation_point_color.2bpp";gbc excalamation point
+Period_CharacterGfx_GameboyColor: INCBIN "gfx/stage/period_color.2bpp" ;gbc period
 E_Acute_CharacterGfx_GameboyColor: INCBIN "gfx/stage/e_acute_color.2bpp"
-GFX_d63d0: INCBIN "gfx/unknown/d63d0.2bpp"
-GFX_d63e0: INCBIN "gfx/unknown/d63e0.2bpp"
+Apostrophe_CharacterGfx_GameboyColor: INCBIN "gfx/stage/apostrophe_color.2bpp" ;GBC apostrophe
+Colon_CharacterGfx_GameboyColor: INCBIN "gfx/stage/colon_color.2bpp" ;gbc colon
 
 SECTION "bank35.6", ROMX
 
