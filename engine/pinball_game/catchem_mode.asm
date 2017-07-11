@@ -1140,23 +1140,23 @@ Func_107e9: ; 0x107e9
 	ld [wd7ad], a
 	ret
 
-Func_107f8: ; 0x107f8
+Func_107f8: ; 0x107f8 play sound effects at 32, 16 and 5 seconds left
 	ld a, [wTimerFrames]
 	and a
-	ret nz
+	ret nz ;if timer frames is not zero, quit
 	ld a, [wTimerMinutes]
 	and a
-	ret nz
+	ret nz ;if timer minutes is not 0, ret
 	ld a, [wTimerSeconds]
 	cp $20
-	jr nz, .asm_10810
+	jr nz, .asm_10810 ;if not equal 32 seconds left, jump, else play sfx
 	lb de, $07, $49
 	call PlaySoundEffect
 	ret
 
 .asm_10810
 	cp $10
-	jr nz, .asm_1081b
+	jr nz, .asm_1081b ;in not equal 16 seconds left jump, else play sfx
 	lb de, $0a, $4a
 	call PlaySoundEffect
 	ret

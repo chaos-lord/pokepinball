@@ -2427,8 +2427,6 @@ wBootCheck:: ; 0xdaa3
 ; Used to do a single check during first VBLANK.
 	ds $1
 
-; $25c bytes of free space
-
 wCaughtFlag:: ;daa4
     ds 1
 wCaughtMonPickup:: ;daa5
@@ -2438,6 +2436,25 @@ wOverrideFlag:: ;daa6
 wCatchMonOverride:: ;daa7
     ds 1
 
+; $258 bytes of free space
+wLoggingblockStart::
+wLoggingStatus::
+    ds 1
+wLoggingMapMoveCount::
+    ds 1
+wLoggingMapMovemap::
+    ds 1
+wLoggingTimeTaken::
+    ds 1
+wLoggingCurrentStatusStart::
+wLoggingCurrentStatusStatus::
+    ds 1
+wLoggingCurrentStatusMapMoveCount::
+    ds 1
+wLoggingCurrentStatusMapMoveMap::
+    ds 1
+wLoggingCatchHistory::
+    ds 197 * 3
 
 
 SECTION "Audio RAM", WRAMX
