@@ -4,7 +4,7 @@ ResolveGengarBonusGameObjectCollisions: ; 0x18377
 	call Func_187b1
 	call Func_18d34
 	call Func_183b7
-	callba Func_107f8
+	callba PlayLowTimeSfx
 	ld a, [wd57e]
 	and a
 	ret z
@@ -52,7 +52,7 @@ Func_183db: ; 0x183db
 	ld h, [hl]
 	ld l, a
 	ld a, BANK(TileDataPointers_183f8)
-	call Func_10aa
+	call QueueGraphicsToLoad
 	ret
 
 TileDataPointers_183f8:
@@ -210,9 +210,9 @@ Func_18464: ; 0x18464
 	ld bc, OneHundredThousandPoints
 	callba AddBigBCD6FromQueue
 	ld a, $33
-	ld [wd803], a
+	ld [wRumblePattern], a
 	ld a, $8
-	ld [wd804], a
+	ld [wRumbleDuration], a
 	ld hl, $0100
 	ld a, l
 	ld [wFlipperYForce], a
@@ -458,9 +458,9 @@ Func_1860b: ; 0x1860b
 	ld bc, FiveHundredThousandPoints
 	callba AddBigBCD6FromQueue
 	ld a, $33
-	ld [wd803], a
+	ld [wRumblePattern], a
 	ld a, $8
-	ld [wd804], a
+	ld [wRumbleDuration], a
 	ld hl, $0100
 	ld a, l
 	ld [wFlipperYForce], a
@@ -727,9 +727,9 @@ Func_187b1: ; 0x187b1
 	ld bc, FiveMillionPoints
 	callba AddBigBCD6FromQueue
 	ld a, $33
-	ld [wd803], a
+	ld [wRumblePattern], a
 	ld a, $8
-	ld [wd804], a
+	ld [wRumbleDuration], a
 	ld hl, $0200
 	ld a, l
 	ld [wFlipperYForce], a
@@ -773,9 +773,9 @@ Func_18876: ; 0x18876
 	ld a, $1
 	ld [wd6a4], a
 	ld a, $11
-	ld [wd803], a
+	ld [wRumblePattern], a
 	ld a, $8
-	ld [wd804], a
+	ld [wRumbleDuration], a
 .asm_1889b
 	ld a, [wGengarAnimationState]
 	ld hl, wd6a3
@@ -824,9 +824,9 @@ Func_188e1: ; 0x188e1
 	jr nz, .asm_18901
 .asm_188f7
 	ld a, $1
-	ld [wd803], a
+	ld [wRumblePattern], a
 	ld a, $8
-	ld [wd804], a
+	ld [wRumbleDuration], a
 .asm_18901
 	ld a, [wGengarAnimationState]
 	cp $6
@@ -885,9 +885,9 @@ Func_1894c: ; 0x1894c
 	inc a
 	ld [wBallYPos + 1], a
 .asm_18973
-	ld a, [wd7a0]
+	ld a, [wUpperTiltPixelsOffset]
 	dec a
-	ld [wd7a0], a
+	ld [wUpperTiltPixelsOffset], a
 	ld a, $1
 	ld [wUpperTiltPushing], a
 	ret
@@ -907,9 +907,9 @@ Func_1894c: ; 0x1894c
 	jr z, .asm_189a5
 	dec a
 	ld [wd6a5], a
-	ld a, [wd7a0]
+	ld a, [wUpperTiltPixelsOffset]
 	inc a
-	ld [wd7a0], a
+	ld [wUpperTiltPixelsOffset], a
 	ret
 
 .asm_189a5
@@ -1429,9 +1429,9 @@ Func_18d34: ; 0x18d34
 	ld bc, OneHundredPoints
 	callba AddBigBCD6FromQueue
 	ld a, $ff
-	ld [wd803], a
+	ld [wRumblePattern], a
 	ld a, $3
-	ld [wd804], a
+	ld [wRumbleDuration], a
 	ld hl, $0100
 	ld a, l
 	ld [wFlipperYForce], a
@@ -1440,7 +1440,7 @@ Func_18d34: ; 0x18d34
 	ld a, $80
 	ld [wFlipperCollision], a
 	ld de, $002f
-	call Func_4d8
+	call PlaySFXIfNoneActive
 .asm_18d71
 	ret
 
@@ -1462,7 +1462,7 @@ Func_18d72: ; 0x18d72
 	or h
 	ret z
 	ld a, Bank(TileDataPointers_18ddb)
-	call Func_10aa
+	call QueueGraphicsToLoad
 	ret
 
 Func_18d91: ; 0x18d91

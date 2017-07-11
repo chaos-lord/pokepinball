@@ -2,7 +2,7 @@ ResolveMewtwoBonusGameObjectCollisions: ; 0x19451
 	call Func_19531
 	call Func_19701
 	call Func_1948b
-	callba Func_107f8
+	callba PlayLowTimeSfx
 	ld a, [wd57e]
 	and a
 	ret z
@@ -49,7 +49,7 @@ Func_194ac: ; 0x194ac
 	ld h, [hl]
 	ld l, a
 	ld a, Bank(Data_194c9)
-	call Func_10aa
+	call QueueGraphicsToLoad
 	ret
 
 Data_194c9:

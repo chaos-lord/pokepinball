@@ -23,12 +23,12 @@ LoadFieldSelectScreen: ; 0xd6dd
 	call ClearOAMBuffer
 	ld a, $8
 	ld [wFieldSelectBlinkingBorderFrame], a
-	call Func_b66
+	call SetAllPalettesWhite
 	ld a, $12
 	call SetSongBank
 	ld de, $0003
 	call PlaySong
-	call Func_588
+	call EnableLCD
 	call FadeIn
 	ld hl, wScreenState
 	inc [hl]
@@ -82,7 +82,7 @@ ExitFieldSelectScreen: ; 0xd774
 	ld a, [hJoypadState]
 	push af
 	call FadeOut
-	call Func_576
+	call DisableLCD
 	ld a, [wd8f6]
 	bit BIT_A_BUTTON, a
 	jr z, .pressedB

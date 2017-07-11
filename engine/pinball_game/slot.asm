@@ -1,7 +1,7 @@
 Func_ed8e: ; 0xed8e
 	xor a
-	ld [wd803], a
-	ld [wd804], a
+	ld [wRumblePattern], a
+	ld [wRumbleDuration], a
 	ld [wCatchEmOrEvolutionSlotRewardActive], a
 	ld a, [wNumPartyMons]
 	ld [wSlotAnyPokemonCaught], a
@@ -25,7 +25,7 @@ Func_ed8e: ; 0xed8e
 	ld hl, HandleFlippers
 	call nz, BankSwitch
 	callba DrawSpritesForStage
-	call Func_33e3
+	call UpdateBottomText
 	call CleanOAMBuffer
 	rst AdvanceFrame
 	ld a, [wd7af]
@@ -254,13 +254,13 @@ SlotRewardPikachuSaver: ; 0xef83
 	ld a, MAX_PIKACHU_SAVER_CHARGE
 	ld [wPikachuSaverCharge], a
 	xor a
-	ld [wd85d], a
+	ld [wAudioEngineEnabled], a
 	call Func_310a
 	rst AdvanceFrame
 	ld a, $0
 	callba PlayPikachuSoundClip
 	ld a, $1
-	ld [wd85d], a
+	ld [wAudioEngineEnabled], a
 	ret
 
 SlotRewardBonusMultiplier: ; 0xefa7

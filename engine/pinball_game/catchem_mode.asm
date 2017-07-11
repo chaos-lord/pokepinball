@@ -300,7 +300,7 @@ Func_101d9: ; 0x101d9
 	push de
 	xor a
 	ld de, Func_11d2
-	call Func_10c5
+	call QueueGraphicsToLoadWithFunc
 	pop de
 	pop hl
 	pop bc
@@ -351,7 +351,7 @@ Func_10230: ; 0x10230
 	push de
 	xor a
 	ld de, LoadTileListsBank1
-	call Func_10c5
+	call QueueGraphicsToLoadWithFunc
 	pop de
 	pop hl
 	pop bc
@@ -429,7 +429,7 @@ Func_102bc: ; 0x102bc
 	xor a
 	ld bc, wc1b8
 	ld de, LoadPalettes
-	call Func_10c5
+	call QueueGraphicsToLoadWithFunc
 	ret
 
 Func_10301: ; 0x10301
@@ -496,7 +496,7 @@ Func_10301: ; 0x10301
 	xor a
 	ld bc, wc1b8
 	ld de, LoadPalettes
-	call Func_10c5
+	call QueueGraphicsToLoadWithFunc
 	ret
 
 Func_10362: ; 0x10362
@@ -569,7 +569,7 @@ Func_1038e: ; 0x1038e
 	push de
 	xor a
 	ld de, Func_11d2
-	call Func_10c5
+	call QueueGraphicsToLoadWithFunc
 	pop de
 	pop bc
 	ret
@@ -594,7 +594,7 @@ Func_10414: ; 0x10414
 	ld a, BANK(Data_10420)
 	ld bc, Data_10420
 	ld de, Func_11b5
-	call Func_10c5
+	call QueueGraphicsToLoadWithFunc
 	ret
 
 Data_10420:
@@ -617,7 +617,7 @@ Func_10432: ; 0x10432
 	ld a, BANK(Data_1043e)
 	ld bc, Data_1043e
 	ld de, LoadTileLists
-	call Func_10c5
+	call QueueGraphicsToLoadWithFunc
 	ret
 
 Data_1043e:
@@ -861,7 +861,7 @@ Func_10611: ; 0x10611
 	ld b, a
 	ld a, BANK(Data_1062a)
 	ld de, Func_11d2
-	call Func_10c5
+	call QueueGraphicsToLoadWithFunc
 	ret
 
 Data_1062a:
@@ -1102,17 +1102,17 @@ ResetIndicatorStates: ; 0x107a5
 
 Func_107b0: ; 0x107b0
 	xor a
-	ld [wd604], a
+	ld [wSlotIsOpen], a
 	ld [wIndicatorStates + 4], a
-	callba Func_16425
+	callba LoadSlotCaveCoverGraphics_RedField
 	ret
 
 Func_107c2: ; 0x107c2
 	ld a, $1e
-	ld [wd607], a
+	ld [wFramesUntilSlotCaveOpens], a
 	ret
 
-Func_107c8: ; 0x107c8
+SetLeftAndRightAlleyArrowIndicatorStates_RedField: ; 0x107c8
 	ld a, [wRightAlleyCount]
 	cp $3
 	jr z, .asm_107d1
@@ -1140,7 +1140,7 @@ Func_107e9: ; 0x107e9
 	ld [wd7ad], a
 	ret
 
-Func_107f8: ; 0x107f8 play sound effects at 32, 16 and 5 seconds left
+PlayLowTimeSfx: ; 0x107f8
 	ld a, [wTimerFrames]
 	and a
 	ret nz ;if timer frames is not zero, quit
@@ -1148,21 +1148,21 @@ Func_107f8: ; 0x107f8 play sound effects at 32, 16 and 5 seconds left
 	and a
 	ret nz ;if timer minutes is not 0, ret
 	ld a, [wTimerSeconds]
-	cp $20
-	jr nz, .asm_10810 ;if not equal 32 seconds left, jump, else play sfx
+	cp 32
+	jr nz, .Not32Seconds
 	lb de, $07, $49
 	call PlaySoundEffect
 	ret
 
-.asm_10810
-	cp $10
-	jr nz, .asm_1081b ;in not equal 16 seconds left jump, else play sfx
+.Not32Seconds
+	cp 16
+	jr nz, .Not16Seconds
 	lb de, $0a, $4a
 	call PlaySoundEffect
 	ret
 
-.asm_1081b
-	cp $5
+.Not16Seconds
+	cp 5
 	ret nz
 	lb de, $0d, $4b
 	call PlaySoundEffect
@@ -1244,11 +1244,11 @@ Func_10871: ; 0x10871
 	bit 0, a
 	jr nz, .asm_108d3
 	callba LoadStageCollisionAttributes
-	callba Func_159f4
+	callba LoadFieldStructureGraphics_RedField
 	ret
 
 .asm_108d3
-	callba Func_14135
+	callba ClearAllRedIndicators
 	callba Func_10184
 	ld a, [hGameBoyColorFlag]
 	and a
@@ -1258,12 +1258,12 @@ Func_10871: ; 0x10871
 Func_108f5: ; 0x108f5
 	call ResetIndicatorStates
 	call Func_107c2
-	call Func_107c8
+	call SetLeftAndRightAlleyArrowIndicatorStates_RedField
 	call Func_107e9
 	ld a, [wCurrentStage]
 	bit 0, a
 	ret z
-	callba Func_14135
+	callba ClearAllRedIndicators
 	call Func_10432
 	callba LoadMapBillboardTileData
 	ld a, Bank(StageSharedBonusSlotGlowGfx)
@@ -1278,12 +1278,12 @@ Func_108f5: ; 0x108f5
 	call LoadVRAMData
 	ld hl, BlankSaverSpaceTileDataRedField
 	ld a, BANK(BlankSaverSpaceTileDataRedField)
-	call Func_10aa
+	call QueueGraphicsToLoad
 	ld a, [wPreviousNumPokeballs]
-	callba Func_174d4
+	callba LoadPokeballsGraphics_RedField
 	ld hl, CaughtPokeballTileDataPointers
 	ld a, BANK(CaughtPokeballTileDataPointers)
-	call Func_10aa
+	call QueueGraphicsToLoad
 	ret
 
 BlankSaverSpaceTileDataRedField:
@@ -1370,7 +1370,7 @@ Func_1098c: ; 0x1098c
 	jr nz, .loop
 	xor a
 	ld [wRightAlleyCount], a
-	callba Func_1f2ed
+	callba CloseSlotCave
 	ld de, $0002
 	call PlaySong
 	ld a, [wCurrentStage]
@@ -1389,7 +1389,7 @@ Func_1098c: ; 0x1098c
 Func_109fc: ; 0x109fc
 	call ResetIndicatorStates
 	call Func_107c2
-	callba Func_1f2ff
+	callba SetLeftAndRightAlleyArrowIndicatorStates_BlueField
 	ld a, [wCurrentStage]
 	bit 0, a
 	ret z
@@ -1408,12 +1408,12 @@ Func_109fc: ; 0x109fc
 	call LoadVRAMData
 	ld hl, BlankSaverSpaceTileDataBlueField
 	ld a, BANK(BlankSaverSpaceTileDataBlueField)
-	call Func_10aa
+	call QueueGraphicsToLoad
 	ld a, [wPreviousNumPokeballs]
-	callba Func_174d4
+	callba LoadPokeballsGraphics_RedField
 	ld hl, Data_10a88
 	ld a, BANK(Data_10a88)
-	call Func_10aa
+	call QueueGraphicsToLoad
 	ret
 
 BlankSaverSpaceTileDataBlueField:

@@ -69,7 +69,7 @@ Func_205e0: ; 0x205e0
 	ld [wIndicatorStates + 10], a
 	ld a, [wCurrentStage]
 	bit 0, a
-	callba nz, Func_14135
+	callba nz, ClearAllRedIndicators
 	ld bc, OneMillionPoints
 	callba AddBigBCD6FromQueue
 	call FillBottomMessageBufferWithBlackTile
@@ -138,7 +138,7 @@ Func_20651: ; 0x20651
 	lb de, $07, $45
 	call PlaySoundEffect
 	ld a, $1
-	ld [wd604], a
+	ld [wSlotIsOpen], a
 	ld a, $80
 	ld [wIndicatorStates + 4], a
 	xor a
@@ -172,7 +172,7 @@ Func_20651: ; 0x20651
 	ld bc, $0008
 	call Func_7dc
 .asm_20700
-	callba Func_16425
+	callba LoadSlotCaveCoverGraphics_RedField
 	ret
 
 Func_2070b: ; 0x2070b
@@ -199,7 +199,7 @@ Func_2070b: ; 0x2070b
 	ret
 
 Func_20757: ; 0x20757
-	ld a, [wd5ca]
+	ld a, [wBottomTextEnabled]
 	and a
 	ret nz
 	call FillBottomMessageBufferWithBlackTile
@@ -225,7 +225,7 @@ Func_2077b: ; 0x2077b
 	jr nz, .asm_2078e
 	call Func_20a55
 .asm_2078e
-	callba Func_107f8
+	callba PlayLowTimeSfx
 	ld a, [wd57e]
 	and a
 	ret z
@@ -234,7 +234,7 @@ Func_2077b: ; 0x2077b
 	ld a, $2
 	ld [wd54d], a
 	xor a
-	ld [wd604], a
+	ld [wSlotIsOpen], a
 	ld hl, wIndicatorStates
 	ld [wIndicatorStates + 4], a
 	ld [wIndicatorStates + 9], a
@@ -254,8 +254,8 @@ Func_2077b: ; 0x2077b
 	ld a, [wCurrentStage]
 	bit 0, a
 	jr z, .asm_207f5
-	callba Func_14135
-	callba Func_16425
+	callba ClearAllRedIndicators
+	callba LoadSlotCaveCoverGraphics_RedField
 .asm_207f5
 	callba StopTimer
 	call FillBottomMessageBufferWithBlackTile
@@ -492,7 +492,7 @@ Func_20977: ; 0x20977
 	ld [wIndicatorStates + 10], a
 	ld a, [wCurrentStage]
 	bit 0, a
-	callba nz, Func_14135
+	callba nz, ClearAllRedIndicators
 	ld a, [hGameBoyColorFlag]
 	and a
 	jr z, .asm_209bf
@@ -540,7 +540,7 @@ Func_209eb: ; 0x209eb
 	ld [wIndicatorStates + 10], a
 	ld a, [wCurrentStage]
 	bit 0, a
-	callba nz, Func_14135
+	callba nz, ClearAllRedIndicators
 	ld a, $58
 	ld [wd556], a
 	ld a, $2
@@ -615,7 +615,7 @@ asm_20a9f:
 	ld [wIndicatorStates + 10], a
 	ld a, [wCurrentStage]
 	bit 0, a
-	callba nz, Func_14135
+	callba nz, ClearAllRedIndicators
 	ld a, [hGameBoyColorFlag]
 	and a
 	jr z, .asm_20ada

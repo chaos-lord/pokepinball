@@ -165,7 +165,8 @@ wd495:: ; 0xd495
 wd496:: ; 0xd496
 	ds $1
 
-wd497:: ; 0xd497
+wNextStage:: ; 0xd497
+; Holds the id of the next stage to go to. Used for transitioning between bonus stage and the main red/blue field.
 	ds $1
 
 wd498:: ; 0xd498
@@ -218,7 +219,8 @@ wBallSaverTimerSecondsBackup:: ; 0xd4a7
 wNumTimesBallSavedTextWillDisplayBackup:: ; 0xd4a8
 	ds $1
 
-wd4a9:: ; 0xd4a9
+wExtraBall:: ; 0xd4a9
+; Set to 1 if the player has an extra ball.
 	ds $1
 
 wDrawBottomMessageBox:: ; 0xd4aa
@@ -229,13 +231,14 @@ wDrawBottomMessageBox:: ; 0xd4aa
 wd4ab:: ; 0xd4ab
 	ds $1
 
-wCurrentStage:: ; 0xd4ac see constants/stage_constants.asm for list. bit 1 is 1 if the stage has flippers
+wCurrentStage:: ; 0xd4ac see constants/stage_constants.asm for list. bit 0 is 1 if the stage has flippers
 	ds $1
 
 wd4ad:: ; 0xd4ad
 	ds $1
 
-wd4ae:: ; 0xd4ae
+wMoveToNextScreenState:: ; 0xd4ae
+; This is set when the the screen state should advance, in the pinball game's core logic state.
 	ds $1
 
 wStageCollisionState:: ; 0xd4af
@@ -283,7 +286,10 @@ wd4c8:: ; 0xd4c8
 wd4c9:: ; 0xd4c9
 	ds $1
 
-wd4ca:: ; 0xd4ca
+wShowExtraBallText:: ; 0xd4ca
+; Setting this byte to 1 or 2 will cause the "Extra Ball" message to scroll across the bottom of the screen.
+; 1 = "EXTRA BALL"
+; 2 = "EXTRA BALL SPECIAL BONUS"
 	ds $1
 
 wWhichVoltorb:: ; 0xd4cb
@@ -324,7 +330,9 @@ wWhichBumper:: ; 0xd4d8
 wWhichBumperId:: ; 0xd4d9
 	ds $1
 
-wd4da:: ; 0xd4da
+wBumperLightUpDuration:: ; 0xd4da
+; Number of frames left in the Bumper light-up animation when the pinball bounces off of it.
+; This is shared by both bumpers, so only one can be lit up at a time.
 	ds $1
 
 wd4db:: ; 0xd4db
@@ -384,13 +392,13 @@ wWhichDiglettId:: ; 0xd4ee
 wWhichPsyduckPoliwagId::
 	ds $1
 
-wd4ef:: ; 0xd4ef
+wLeftDiglettAnimationController:: ; 0xd4ef $50 = in and pained look. 0 = normal state
 	ds $1
 
 wLeftMapMoveCounter:: ; 0xd4f0
 	ds $1
 
-wd4f1:: ; 0xd4f1
+wRightDiglettAnimationController:: ; 0xd4f1 $50 = in and pained look. 0 = normal state
 	ds $1
 
 wRightMapMoveCounter:: ; 0xd4f2
@@ -493,7 +501,9 @@ wPikachuSaverCharge:: ; 0xd517
 ; in the right alley. The charge's value ranges from 0 - 15.
 	ds $1
 
-wd518:: ; 0xd518
+wWhichPikachuSaverSide:: ; 0xd518
+; 0 = Pikachu is on the left side
+; 1 = Pikachu is on the right side
 	ds $1
 
 wPikachuSaverAnimation:: ; 0xd519
@@ -600,7 +610,9 @@ wd558:: ; 0xd558
 wd559:: ; 0xd559
 	ds $1
 
-wd55a:: ; 0xd55a
+wMapMoveDirection:: ; 0xd55a
+; 0 = need to hit the ball left to open map move slot cave
+; 1 = need to hit the ball right to open map move slot cave
 	ds $1
 
 wRareMonsFlag:: ; 0xd55b
@@ -661,7 +673,7 @@ wTimerActive:: ; 0xd57d
 ; Set to 1 when the Timer is displayed and counting down.
 	ds $1
 
-wd57e:: ; 0xd57e
+wd57e:: ; 0xd57e when map mode fails by time, toggled to off from on
 	ds $1
 
 wd57f:: ; 0xd57f
@@ -730,10 +742,15 @@ wWildMonCollision:: ; 0xd5c7
 
 	ds $1
 
-wd5ca:: ; 0xd5ca set to 1 by a commonly called text function that is called at the start of catch and raises the score bar. set off by text handler if no text is ready to run. Possibly toggles if text is running?
+wBottomTextEnabled:: ; 0xd5ca
+; 1 = text messages in the bottom black bar are enabled
+; 0 = disabled--the text won't appear even if LoadScrollingText is called
 	ds $1
 
-wd5cb:: ; 0xd5cb set to 0 if the above is 0 during Func_33e3
+wDisableDrawScoreboardInfo:: ; 0xd5cb
+; This is set when text messages are shown in the bottom black bar.
+; 1 = Skip drawing the scoreboard icons in the bottom black bar. (num pokemon caught, number of balls left, score)
+; 0 = Draw them.
 	ds $1
 
 scrolling_text: MACRO
@@ -802,29 +819,43 @@ wDittoSlotCollision:: ; 0xd5fe
 ; Second byte is set by HandleGameObjectCollision, but is unused
 	ds $2
 
-wd600:: ; 0xd600
+wDittoEnterOrExitCounter:: ; 0xd600
+; Number of frames remaining in the process when the pinball is entering or exiting the Ditto cave.
+; This functions the same way as wSlotEnterOrExitCounter.
 	ds $1
 
 wSlotCollision:: ; 0xd601
 ; Second byte is set by HandleGameObjectCollision, but is unused
 	ds $2
 
-wd603:: ; 0xd603
+wSlotEnterOrExitCounter:: ; 0xd603
+; Number of frames remaining in the process when the pinball is entering or exiting the slot cave.
+; This functions the same way as wDittoEnterOrExitCounter.
 	ds $1
 
-wd604:: ; 0xd604
-	ds $2
-
-wd606:: ; 0xd606
+wSlotIsOpen:: ; 0xd604
+; Whether or not the Slot is open for the pinball to enter. 1 = open; 0 = closed
 	ds $1
 
-wd607:: ; 0xd607
+	ds $1 ; unused
+
+wSlotGlowingAnimationCounter:: ; 0xd606
+; When the slot is open, this counter increments once every frame, which controls the glowing
+; animation around the slot cave.
 	ds $1
 
-wd608:: ; 0xd608
+wFramesUntilSlotCaveOpens:: ; 0xd607
+; When set to non-zero value, it decrements once per frame. When it hits 0, the Slot cave will open.
 	ds $1
 
-wd609:: ; 0xd609
+wOpenedSlotByGetting4CAVELights:: ; 0xd608
+; Set to 1 when the slot bonus was trigered by lighting up all 4 CAVE lights.
+; See wCAVELightStates
+	ds $1
+
+wOpenedSlotByGetting3Pokeballs:: ; 0xd609
+; Set to 1 when the slot bonus was triggered by achieving 3 Pokeballs (the pokeballs underneath the billboard).
+; See wNumPokeballs.
 	ds $1
 
 wWhichBonusMultiplierRailing:: ; 0xd60a
@@ -1005,13 +1036,13 @@ wd643:: ; 0xd643
 wd644:: ; 0xd644
 	ds $1
 
-wd645:: ; 0xd645
+wPsyduckState:: ; 0xd645
 	ds $1
 
-wd646:: ; 0xd646
+wPoliwagState:: ; 0xd646
 	ds $1
 
-wd647:: ; 0xd647
+wBonusMultiplierRailingEndLightDuration:: ; 0xd647
 	ds $1
 
 wd648:: ; 0xd648
@@ -1635,10 +1666,12 @@ wd79c:: ; 0xd79c
 wd79e:: ; 0xd79e
 	ds $1
 
-wd79f:: ; 0xd79f
+wLeftAndRightTiltPixelsOffset:: ; 0xd79f
+; Horizontal offset in pixels that the left and right tilt are currently moving the screen.
 	ds $1
 
-wd7a0:: ; 0xd7a0
+wUpperTiltPixelsOffset:: ; 0xd7a0
+; Vertical offset in pixels that the upper tilt is currently moving the screen.
 	ds $1
 
 wLeftTiltCounter:: ; 0xd7a1
@@ -1668,13 +1701,19 @@ wRightTiltPushing:: ; 0xd7a8
 wUpperTiltPushing:: ; 0xd7a9
 	ds $1
 
-wd7aa:: ; 0xd7aa
+wUnused_d7aa:: ; 0xd7aa
+; not actually used
 	ds $1
 
 wSCX:: ; 0xd7ab
 	ds $1
 
-wd7ac:: ; 0xd7ac
+wDisableHorizontalScrollForBallStart:: ; 0xd7ac
+; Controls whether or not the screen will scroll to accomodate the pinball when its off-screen.
+; When the ball is launched on the Blue and Red Fields, the screen starts off scrolled to the right.
+; However, when the balls rolls in on Bonus Stages, the screen does NOT scroll.
+; 1 = Disable the scrolling
+; 0 = Enable the scrolling
 	ds $1
 
 wd7ad:: ; 0xd7ad
@@ -1827,10 +1866,13 @@ wd801:: ; 0xd801
 wOAMBufferSize:: ; 0xd802
 	ds $1
 
-wd803:: ; 0xd803
+wRumblePattern:: ; 0xd803
+; Holds the rumble pattern for the upcoming frames.
+; This gets rotated to the right once per frame. If bit 0 is set, then it turns on rumble.
 	ds $1
 
-wd804:: ; 0xd804
+wRumbleDuration:: ; 0xd804
+; Number of frames to rumble the Gameboy. See wRumblePattern.
 	ds $1
 
 wd805:: ; 0xd805 enables unused and odd PlaceString
@@ -1873,27 +1915,18 @@ wd811:: ; 0xd811
 	ds $1
 
 wd812:: ; 0xd812
-	ds $18
-
-wd82a:: ; 0xd82a
-	ds $7
-
-wd831:: ; 0xd831
-	ds $c
-
-wd83d:: ; 0xd83d
-	ds $9
-
-wd846:: ; 0xd846
-	ds $2
+	ds $36
 
 wd848:: ; 0xd848
 	ds $1
 
-wd849:: ; 0xd849
+wUpdateAudioEngineUsingTimerInterrupt:: ; 0xd849
+; See ToggleAudioEngineUpdateMethod function for more in-depth explanation.
 	ds $1
 
-wd84a:: ; 0xd84a
+wToggleAudioEngineUpdateMethod:: ; 0xd84a
+; When this byte is set to 1, it toggles between the audio engine being updated by V-Blank vs. Timer Interrupt.
+; See ToggleAudioEngineUpdateMethod function for more in-depth explanation.
 	ds $1
 
 wd84b:: ; 0xd84b
@@ -1905,7 +1938,9 @@ wd84f:: ; 0xd84f
 wCurrentSongBank:: ; 0xd85b
 	ds $2
 
-wd85d:: ; 0xd85d
+wAudioEngineEnabled:: ; 0xd85d
+; 1 = normal audio (music/sfx) engine is enabled
+; 0 = disabled
 	ds $1
 
 wd85e:: ; 0xd85e
@@ -2155,6 +2190,7 @@ wd8e9:: ; 0xd8e9
 	ds $1
 
 wd8ea:: ; 0xd8ea
+; IR status flags?
 	ds $1
 
 wd8eb:: ; 0xd8eb

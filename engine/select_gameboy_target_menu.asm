@@ -39,8 +39,8 @@ InitSelectGameboyTargetMenu: ; 0x800a
 	ld [hSCY], a
 	call LoadGameboyTargetMenuGfx
 	call ClearOAMBuffer
-	call Func_b66
-	call Func_588
+	call SetAllPalettesWhite
+	call EnableLCD
 	call FadeIn
 	ld hl, wScreenState
 	inc [hl]
@@ -73,7 +73,7 @@ LoadGameboyTargetMenuGfx: ; 0x8049
 	ld a, Bank(SelectGameboyTarget_TileData)
 	ld bc, SelectGameboyTarget_TileData
 	ld de, LoadTileLists
-	call Func_10c5
+	call QueueGraphicsToLoadWithFunc
 	ret
 
 SelectGameboyTargetGfxPointers: ; 0x8089
@@ -202,14 +202,14 @@ SelectCGBOrDMG: ; 0x8104
 	ld a, Bank(DMGSelected_TileData)
 	ld bc, DMGSelected_TileData
 	ld de, LoadTileLists
-	call Func_10c5
+	call QueueGraphicsToLoadWithFunc
 	ret
 
 .cgb
 	ld a, Bank(CGBSelected_TileData)
 	ld bc, CGBSelected_TileData
 	ld de, LoadTileLists
-	call Func_10c5
+	call QueueGraphicsToLoadWithFunc
 	ret
 
 DMGSelected_TileData: ; 0x813a
@@ -230,7 +230,7 @@ CGBSelected_TileData: ; 0x8144
 
 EndSelectGameboyTargetMenu: ; 0x414e
 	call FadeOut
-	call Func_576
+	call DisableLCD
 	ld hl, wCurrentScreen
 	inc [hl] ; set to SCREEN_ERASE_ALL_DATA
 	xor a

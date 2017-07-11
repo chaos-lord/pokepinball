@@ -20,8 +20,8 @@ FadeInCopyrightScreen: ; 0x8228
 	ld hl, CopyrightTextGfxPointers
 	call LoadVideoData
 	call ClearOAMBuffer
-	call Func_b66
-	call Func_588
+	call SetAllPalettesWhite
+	call EnableLCD
 	call SGBNormal
 	ld bc, $0050
 	call AdvanceFrames
@@ -68,7 +68,7 @@ DisplayCopyrightScreen: ; 0x8290
 
 FadeOutCopyrightScreenAndLoadData: ; 0x82a8
 	call FadeOut
-	call Func_576
+	call DisableLCD
 	ld hl, sHighScores
 	ld de, wRedHighScore1Points
 	ld bc, $0082

@@ -222,7 +222,7 @@ ResolveMeowthBonusGameObjectCollisions: ; 0x2442a
 	ld a, [wd712]
 	cp $4
 	jr z, .asm_244c1
-	callba Func_107f8
+	callba PlayLowTimeSfx
 .asm_244c1
 	ld a, [wd57e]
 	and a
@@ -274,7 +274,7 @@ Func_24516: ; 0x24516
 	ld h, [hl]
 	ld l, a
 	ld a, Bank(TileDataPointers_24533)
-	call Func_10aa
+	call QueueGraphicsToLoad
 	ret
 
 TileDataPointers_24533: ; 0x24533
@@ -415,9 +415,9 @@ Func_245ab: ; 0x245ab
 	ld [wd6e7], a
 	ld [wd6f3], a
 	ld a, $ff
-	ld [wd803], a
+	ld [wRumblePattern], a
 	ld a, $3
-	ld [wd804], a
+	ld [wRumbleDuration], a
 	lb de, $00, $33
 	call PlaySoundEffect
 	ld bc, OneThousandPoints
@@ -1661,9 +1661,9 @@ Func_24e7f: ; 0x24e7f
 	ld [hl], a
 .asm_24e92
 	ld a, $ff
-	ld [wd803], a
+	ld [wRumblePattern], a
 	ld a, $3
-	ld [wd804], a
+	ld [wRumbleDuration], a
 	lb de, $00, $32
 	call PlaySoundEffect
 	ld a, [wMeowthStageBonusCounter]
@@ -1894,7 +1894,7 @@ Func_24fa3: ; 0x24fa3
 	ld h, [hl]
 	ld l, a
 	ld a, Bank(TileDataPointers_25007)
-	call Func_10aa
+	call QueueGraphicsToLoad
 	ret
 
 TileDataPointers_25007:

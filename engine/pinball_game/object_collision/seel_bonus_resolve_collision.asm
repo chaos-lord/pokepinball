@@ -37,7 +37,7 @@ ResolveSeelBonusGameObjectCollisions: ; 0x25c5a
 	ld a, [wd794]
 	cp $2
 	jr z, .asm_25cc1
-	callba Func_107f8
+	callba PlayLowTimeSfx
 .asm_25cc1
 	ld a, [wd57e]
 	and a
@@ -87,7 +87,7 @@ Func_25d0e: ; 0x25d0e
 	ld h, [hl]
 	ld l, a
 	ld a, Bank(TileDataPointers_25d2b)
-	call Func_10aa
+	call QueueGraphicsToLoad
 	ret
 
 TileDataPointers_25d2b:
@@ -258,9 +258,9 @@ Func_25da3: ; 0x25da3
 	ld [wd79a], a
 .asm_25e07
 	ld a, $33
-	ld [wd803], a
+	ld [wRumblePattern], a
 	ld a, $8
-	ld [wd804], a
+	ld [wRumbleDuration], a
 	lb de, $00, $30
 	call PlaySoundEffect
 	call Func_25e85
@@ -1161,7 +1161,7 @@ Func_262f4: ; 0x262f4
 	ld h, [hl]
 	ld l, a
 	ld a, Bank(TileDataPointers_2634a)
-	call Func_10aa
+	call QueueGraphicsToLoad
 	ret
 
 TileDataPointers_2634a:
