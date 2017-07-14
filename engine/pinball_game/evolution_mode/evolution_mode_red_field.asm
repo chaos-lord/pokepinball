@@ -251,6 +251,8 @@ Func_2077b: ; 0x2077b
 	ld [wd558], a
 	ld [wd559], a
 	ld [wd551], a
+	ld a, 3
+	ld [wCollectLogFlag], a
 	ld a, [wCurrentStage]
 	bit 0, a
 	jr z, .asm_207f5
@@ -268,21 +270,27 @@ Func_2077b: ; 0x2077b
 Func_2080f: ; 0x2080f
 	ld bc, $0001
 	ld de, $5000
-	call Func_3538
+	call Func_3538 ;add score?
 	ld a, [wd551]
 	and a
-	jr nz, .asm_20837
+	jr nz, .asm_20837 ;jump is ??? = nz
 	ld a, [wIndicatorStates + 9]
 	and a
-	jr z, .asm_20837
+	jr z, .asm_20837 ;if indicator is 0, ret
+	ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
-	ld [wIndicatorStates + 9], a
+	ld [wIndicatorStates + 9], a ;make indicator 0
 	ld a, [wd55c]
 	and a
 	ld a, $0
-	ld [wd55c], a
+	ld [wd55c], a ;0 out ???(sets whether this area is good or tired?), if it was 0 run ???, else run ???
 	jp nz, Func_20977
-	jp Func_209eb
+	jp Func_209eb ;is tired
 
 .asm_20837
 	scf
@@ -295,6 +303,12 @@ Func_20839: ; 0x20839
 	ld a, [wIndicatorStates + 2]
 	and a
 	jr z, .asm_20858
+	ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 2], a
 	ld a, [wd563]
@@ -318,6 +332,12 @@ Func_2085a: ; 0x2085a
 	ld a, [wIndicatorStates + 3]
 	and a
 	jr z, .asm_20885
+	ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 3], a
 	ld [wIndicatorStates + 10], a
@@ -339,6 +359,12 @@ Func_20887: ; 0x20887
 	ld a, [wIndicatorStates + 8]
 	and a
 	jr z, .asm_208a6
+	ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 8], a
 	ld a, [wd561]
@@ -359,6 +385,12 @@ Func_208a8: ; 0x208a8
 	ld a, [wIndicatorStates + 13]
 	and a
 	jr z, .asm_208c7 ;if indicator is off, skip
+	ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 13], a ;flick off indicator
 	ld a, [wd55d]
@@ -379,6 +411,12 @@ Func_208c9: ; 0x208c9
 	ld a, [wIndicatorStates + 14]
 	and a
 	jr z, .asm_208e8
+	ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 14], a
 	ld a, [wd55e]
@@ -399,6 +437,12 @@ Func_208ea: ; 0x208ea
 	ld a, [wIndicatorStates + 11]
 	and a
 	jr z, .asm_20909
+	ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 11], a
 	ld a, [wd55f]
@@ -419,6 +463,12 @@ Func_2090b: ; 0x2090b
 	ld a, [wIndicatorStates + 12]
 	and a
 	jr z, .asm_2092a
+	ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 12], a
 	ld a, [wd560]
@@ -439,6 +489,12 @@ Func_2092c: ; 0x2092c
 	ld a, [wIndicatorStates + 6]
 	and a
 	jr z, .asm_2094b
+	ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 6], a
 	ld a, [wd565]
@@ -462,6 +518,12 @@ Func_2094d: ; 0x2094d
 	ld a, [wIndicatorStates + 7]
 	and a
 	jr z, .asm_20975
+	ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 7], a
 	ld a, [wd564]

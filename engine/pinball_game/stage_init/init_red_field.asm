@@ -22,6 +22,15 @@ InitRedField: ; 0x30000
 	ld [wDisableHorizontalScrollForBallStart], a
 	ld [wd7be], a
 	ld [wCurrentMap], a  ; PALLET_TOWN
+	ld hl, wLoggingBlockStart
+	ld [hli], a
+	ld [hli], a
+	ld [hli], a
+	ld [hli], a
+	ld [hli], a
+	ld [hli], a
+	ld [hli], a
+	ld [hl], a
 	ld a, $1
 	ld [wd49d], a
 	ld [wCurBonusMultiplier], a

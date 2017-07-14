@@ -144,6 +144,26 @@ Func_31234: ; 0x31234
 ChooseNextMap_RedField: ; 0x31282
 ; Picks the next map to perform a map move.
 ; Also records which maps have been visited.
+    push bc
+    ld a, [wLoggingMapMoveCount]
+    inc a
+    ld [wLoggingMapMoveCount], a
+    cp 9
+    jr nc, .DontAddToMap
+    ld c, a
+    ld a, [wMapMoveDirection]
+.Loop
+    dec c
+    jr z, .DoneShifting
+    sla a
+    jr .Loop
+.DoneShifting
+    ld c, a
+    ld a, [wLoggingCurrentStatusMapMoveMap]
+    and c
+    ld [wLoggingCurrentStatusMapMoveMap], a
+.DontAddToMap
+    pop bc
 	ld a, [wNumMapMoves]
 	inc a
 	cp $6
@@ -322,6 +342,26 @@ Func_313c3: ; 0x313c3
 ChooseNextMap_BlueField: ; 0x3140b
 ; Picks the next map to perform a map move.
 ; Also records which maps have been visited.
+    push bc
+    ld a, [wLoggingMapMoveCount]
+    inc a
+    ld [wLoggingMapMoveCount], a
+    cp 9
+    jr nc, .DontAddToMap
+    ld c, a
+    ld a, [wMapMoveDirection]
+.Loop
+    dec c
+    jr z, .DoneShifting
+    sla a
+    jr .Loop
+.DoneShifting
+    ld c, a
+    ld a, [wLoggingCurrentStatusMapMoveMap]
+    and c
+    ld [wLoggingCurrentStatusMapMoveMap], a
+.DontAddToMap
+    pop bc
 	ld a, [wNumMapMoves]
 	inc a
 	cp $6

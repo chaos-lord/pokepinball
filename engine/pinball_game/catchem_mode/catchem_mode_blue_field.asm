@@ -216,6 +216,8 @@ Func_204b3: ; 0x204b3
 	ld a, [wTimeRanOut]
 	and a
 	ret z
+    ld a, 2
+	ld [wCollectLogFlag], a
 	xor a
 	ld [wTimeRanOut], a
 	ld a, $7

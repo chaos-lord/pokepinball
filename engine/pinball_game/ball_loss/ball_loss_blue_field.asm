@@ -71,6 +71,8 @@ Func_ded6: ; 0xded6
 	ld a, [wSpecialMode]
 	and a
 	jr nz, .asm_deec
+    ld a, 2
+	ld [wCollectLogFlag], a
 	callba ConcludeCatchEmMode
 	ret
 
@@ -81,6 +83,8 @@ Func_ded6: ; 0xded6
 	ld [wSlotIsOpen], a
 	ld a, $1e
 	ld [wFramesUntilSlotCaveOpens], a
+    ld a, 3
+	ld [wCollectLogFlag], a
 	callba ConcludeEvolutionMode
 	ret
 

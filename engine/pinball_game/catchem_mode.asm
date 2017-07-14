@@ -45,6 +45,11 @@ StartCatchEmMode: ; 0x1003f
 	sla a
 	ld c, a
 	add hl, bc
+	sla c
+	sla c ;rare flag not bit 6
+	ld a, [wLoggingCurrentStatusStatus] ;set rare flag in log, current status should never set this
+	and c
+	ld [wLoggingStatus], a
 	ld a, [hl]  ; a contains mon id. overshoots by 1 if mew, causing mew to be loaded
 	dec a
 	jp .NoOverride
@@ -1038,11 +1043,42 @@ AddCaughtPokemonToParty: ; 0x1073d
 	ld b, $0
 	ld hl, wPartyMons
 	add hl, bc
+	cp 197 ;check for overslow of partymons
 	ld a, [wCurrentCatchEmMon]
 	ld [hl], a
 	ld [wCaughtMonPickup], a
 	ld a, 1
 	ld [wCaughtFlag], a
+
+	jr nc, .SkipLoggingIfFull
+	ld hl, wLoggingCatchHistory ;record catch history in status log
+	add hl, bc
+	add hl, bc
+	add hl, bc
+	ld a, [wLoggingStatus]
+	ld [hli], a
+	ld a, [wLoggingMapMoveCount]
+	ld [hli], a
+	ld a, [wLoggingMapMoveMap]
+	ld [hli], a
+	ld a, [wTimerMinutes]
+	ld c, a
+	sla a
+	sla a
+	sla a
+	sla a ;*16 - 1 = 15 * 4 = 60
+	sub c
+	sla a
+	sla a
+	ld c, a
+	ld a, [wTimerSeconds]
+	add c
+	ld [hli], a
+	xor a
+	ld [hl], a
+	inc a
+	ld [wCollectLogFlag], a
+.SkipLoggingIfFull
 	ld a, [wNumPartyMons]
 	inc a
 	ld [wNumPartyMons], a

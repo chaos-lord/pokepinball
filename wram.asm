@@ -2489,14 +2489,18 @@ wCatchMonOverride:: ;daa7
     ds 1
 
 ; $258 bytes of free space
-wLoggingblockStart::
+wCollectLogFlag:: ;daa8 1 = normal log, 2 = fail catch, 3 = fail evo
+    ds 1
+wLoggingBlockStart:: ;daa9
 wLoggingStatus::
     ds 1
-wLoggingMapMoveCount::
+wLoggingMapMoveCount:: ;daaa
     ds 1
-wLoggingMapMovemap::
+wLoggingMapMoveMap:: ;daab
     ds 1
-wLoggingTimeTaken::
+wLoggingTimeTaken:: ;daac
+    ds 1
+wLoggingFirstFeatureHit:: ;daad
     ds 1
 wLoggingCurrentStatusStart::
 wLoggingCurrentStatusStatus::

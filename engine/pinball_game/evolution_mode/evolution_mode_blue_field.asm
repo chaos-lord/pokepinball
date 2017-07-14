@@ -248,6 +248,8 @@ Func_20da0: ; 0x20da0
 	ld [wd558], a
 	ld [wd559], a
 	ld [wd551], a
+	ld a, 3
+	ld [wCollectLogFlag], a
 	ld a, [wCurrentStage]
 	bit 0, a
 	jr z, .asm_20e1a
@@ -272,6 +274,12 @@ Func_20e34: ; 0x20e34
 	ld a, [wIndicatorStates + 9]
 	and a
 	jr z, .asm_20e5c
+    ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 9], a
 	ld a, [wd55c]
@@ -292,6 +300,12 @@ Func_20e5e: ; 0x20e5e
 	ld a, [wIndicatorStates + 3]
 	and a
 	jr z, .asm_20e80
+    ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 3], a
 	ld [wIndicatorStates + 10], a
@@ -313,6 +327,12 @@ Func_20e82: ; 0x20e82
 	ld a, [wIndicatorStates + 8]
 	and a
 	jr z, .asm_20ea4
+    ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 8], a
 	ld [wIndicatorStates + 2], a
@@ -334,6 +354,12 @@ Func_20ea6: ; 0x20ea6
 	ld a, [wIndicatorStates + 13]
 	and a
 	jr z, .asm_20ec5
+	ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 13], a
 	ld a, [wd55d]
@@ -354,6 +380,12 @@ Func_20ec7: ; 0x20ec7
 	ld a, [wIndicatorStates + 14]
 	and a
 	jr z, .asm_20ee6
+	ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 14], a
 	ld a, [wd55e]
@@ -374,6 +406,12 @@ Func_20ee8: ; 0x20ee8
 	ld a, [wIndicatorStates + 11]
 	and a
 	jr z, .asm_20f07
+	ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 11], a
 	ld a, [wd55f]
@@ -394,6 +432,12 @@ Func_20f09: ; 0x20f09
 	ld a, [wIndicatorStates + 12]
 	and a
 	jr z, .asm_20f28
+	ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 12], a
 	ld a, [wd560]
@@ -414,6 +458,12 @@ Func_20f2a: ; 0x20f2a
 	ld a, [wIndicatorStates + 6]
 	and a
 	jr z, .asm_20f49
+	ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 6], a
 	ld a, [wd565]
@@ -437,6 +487,12 @@ Func_20f4b: ; 0x20f4b
 	ld a, [wIndicatorStates + 7]
 	and a
 	jr z, .asm_20f73
+	ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates + 7], a
 	ld a, [wd564]
@@ -573,6 +629,12 @@ Func_21089: ; 0x21089
 	ld a, [wIndicatorStates]
 	and a
 	jr z, .asm_210a8
+    ld a, [wLoggingFirstFeatureHit]
+	and a
+	jr nz, .AlreadyLogged
+	ld a, [wSpecialModeCollisionID]
+	ld [wLoggingFirstFeatureHit], a
+.AlreadyLogged
 	xor a
 	ld [wIndicatorStates], a
 	ld a, [wd563]

@@ -22,6 +22,14 @@ InitBlueField: ; 0x1c000
 	ld [wDisableHorizontalScrollForBallStart], a
 	ld [wd7be], a
 	ld [wCurrentMap], a  ; PALLET_TOWN
+    ld hl, wLoggingMapMoveCount
+	ld [hli], a
+	ld [hli], a
+	ld [hli], a
+	ld [hli], a
+	ld [hli], a
+	ld [hli], a
+	ld [hl], a
 	ld a, $1
 	ld [wd49d], a
 	ld [wCurBonusMultiplier], a
@@ -36,6 +44,7 @@ InitBlueField: ; 0x1c000
 	ld a, $80
 	ld [wIndicatorStates], a
 	ld [wIndicatorStates + 3], a
+	ld [wLoggingCurrentStatusStatus], a
 	ld a, $82
 	ld [wIndicatorStates + 1], a
 	xor a

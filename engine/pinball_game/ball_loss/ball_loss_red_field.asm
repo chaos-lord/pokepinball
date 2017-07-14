@@ -71,6 +71,8 @@ Func_ddfd: ; 0xddfd
 	ld a, [wSpecialMode]
 	and a
 	jr nz, .asm_de14
+	ld a, 2
+	ld [wCollectLogFlag], a
 	callba ConcludeCatchEmMode
 	jr .asm_de40
 
@@ -81,6 +83,8 @@ Func_ddfd: ; 0xddfd
 	ld [wSlotIsOpen], a
 	ld a, $1e
 	ld [wFramesUntilSlotCaveOpens], a
+    ld a, 3
+	ld [wCollectLogFlag], a
 	callba ConcludeEvolutionMode
 	jr .asm_de40
 

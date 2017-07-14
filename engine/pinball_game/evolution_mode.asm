@@ -318,6 +318,44 @@ PlaceEvolutionInParty: ; 0x10ca5
 	ld a, [wCurSelectedPartyMon]
 	ld c, a
 	ld b, $0
+	cp 197
+	jp nc, .LogFull
+	ld hl, wLoggingCatchHistory
+	add hl, bc
+	add hl, bc
+	add hl, bc
+	ld a, [hl]
+	ld d, a
+	and %00110000
+	cp %00110000
+	ld a, d
+	jr c, .SkipAddition
+	add $10
+	ld [hli], a
+.SkipAddition
+    ld [wLoggingStatus], a
+    ld a, [hli]
+    ld [wLoggingMapMoveCount], a
+    ld a, [hli]
+    ld [wLoggingMapMoveMap], a
+    ld a, [wTimerMinutes]
+	ld d, a
+	sla a
+	sla a
+	sla a
+	sla a ;*16 - 1 = 15 * 4 = 60
+	sub d
+	sla a
+	sla a
+	ld d, a
+	ld a, [wTimerSeconds]
+	add d
+	ld [wLoggingTimeTaken], a
+    ld a, 1
+    ld [wCollectLogFlag], a
+.LogFull
+    xor a
+    ld [wLoggingFirstFeatureHit], a
 	ld hl, wPartyMons
 	add hl, bc
 	ld a, [wCurrentEvolutionMon]
