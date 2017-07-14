@@ -472,45 +472,6 @@ PikachuSaverOAMOffsets_RedStage:
 	dw $7E0F
 	dw $7E92
 
-Func_17e4f: ; 0x17e4f
-; unused
-	ld hl, UnusedData_7e55
-	jp Func_17e5e
-
-UnusedData_7e55: ; 0x17e55
-	db $00, $2B, $69, $CB, $00, $67, $54, $CC
-	db $FF
-
-Func_17e5e: ; 0x17e5e
-; unused
-	ld a, [hGameBoyColorFlag]
-	ld e, a
-	ld a, [hSCX]
-	ld d, a
-.asm_17e64
-	ld a, [hli]
-	cp $ff
-	ret z
-	or e
-	jr nz, .asm_17e70
-	inc hl
-	inc hl
-	inc hl
-	jr .asm_17e64
-.asm_17e70
-	ld a, [hli]
-	sub d
-	ld b, a
-	ld a, [hSCY]
-	ld c, a
-	ld a, [hli]
-	sub c
-	ld c, a
-	ld a, [hli]
-	bit 0, e
-	call nz, LoadOAMData
-	jr .asm_17e64
-
 DrawPinball: ; 0x17e81
 	ld a, [wPinballIsVisible]
 	and a

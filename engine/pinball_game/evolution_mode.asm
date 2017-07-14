@@ -318,7 +318,7 @@ PlaceEvolutionInParty: ; 0x10ca5
 	ld a, [wCurSelectedPartyMon]
 	ld c, a
 	ld b, $0
-	cp 197
+	cp 196
 	jp nc, .LogFull
 	ld hl, wLoggingCatchHistory
 	add hl, bc

@@ -1045,7 +1045,7 @@ AddCaughtPokemonToParty: ; 0x1073d
 	ld b, $0
 	ld hl, wPartyMons
 	add hl, bc
-	cp 197 ;check for overslow of partymons
+	cp 196 ;check for overslow of partymons
 	ld a, [wCurrentCatchEmMon]
 	ld [hl], a
 	ld [wCaughtMonPickup], a

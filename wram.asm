@@ -2513,7 +2513,7 @@ wLoggingCurrentStatusMapMoveMap::
 wLoggingCurrentStatusBallLevel::
     ds 1
 wLoggingCatchHistory::
-    ds 197 * 3
+    ds 196 * 3
 
 
 SECTION "Audio RAM", WRAMX
