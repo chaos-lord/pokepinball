@@ -2500,7 +2500,8 @@ wLoggingMapMoveMap:: ;daab
     ds 1
 wLoggingTimeTaken:: ;daac
     ds 1
-wLoggingFirstFeatureHit:: ;daad
+wLoggingFirstFeatureHit::
+wLoggingCatchBallType::;daad
     ds 1
 wLoggingCurrentStatusStart::
 wLoggingCurrentStatusStatus::
@@ -2508,6 +2509,8 @@ wLoggingCurrentStatusStatus::
 wLoggingCurrentStatusMapMoveCount::
     ds 1
 wLoggingCurrentStatusMapMoveMap::
+    ds 1
+wLoggingCurrentStatusBallLevel::
     ds 1
 wLoggingCatchHistory::
     ds 197 * 3

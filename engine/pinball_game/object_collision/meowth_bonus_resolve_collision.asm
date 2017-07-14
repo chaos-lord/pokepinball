@@ -200,6 +200,17 @@ ResolveMeowthBonusGameObjectCollisions: ; 0x2442a
 	call PlaySong
 	ld a, $1
 	ld [wCompletedBonusStage], a
+	push bc
+    ld a, [wLoggingCurrentStatusStatus]
+    ld c, a
+    and %00001111
+    cp %00001111
+    jp z, .MaxStages
+    ld a, c
+    inc a
+    ld [wLoggingCurrentStatusStatus], a
+.MaxStages
+    pop bc
 	call FillBottomMessageBufferWithBlackTile
 	call Func_30db
 	ld hl, wScrollingText3

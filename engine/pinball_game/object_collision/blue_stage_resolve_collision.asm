@@ -2097,6 +2097,7 @@ ResolveBallUpgradeTriggersCollision_BlueField: ; 0x1e356
 	add hl, bc
 	ld a, [hl]
 	ld [wBallType], a
+	ld [wLoggingCurrentStatusBallLevel], a
 	add $30
 	ld [wBottomMessageText + $12], a
 	jr .done
@@ -2120,6 +2121,8 @@ ResolveBallUpgradeTriggersCollision_BlueField: ; 0x1e356
 	ld hl, wScrollingText1
 	ld de, FieldMultiplierSpecialBonusText
 	call LoadScrollingText
+	ld a, 5
+	ld [wLoggingCurrentStatusBallLevel], a
 .done
 	callba TransitionPinballUpgrade
 	jr LoadPinballUpgradeTriggersGraphics_BlueField
@@ -2298,6 +2301,7 @@ UpdateBallTypeUpgradeCounter_BlueField: ; 0x1e58c
 	add hl, bc
 	ld a, [hl]
 	ld [wBallType], a
+	ld [wLoggingCurrentStatusBallLevel], a
 	and a
 	jr z, .pokeball
 	; load approximately 1 minute of frames into wBallTypeCounter

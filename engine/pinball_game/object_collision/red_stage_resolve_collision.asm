@@ -989,6 +989,7 @@ ResolveBallUpgradeTriggersCollision_RedField: ; 0x1535d
 	add hl, bc
 	ld a, [hl]
 	ld [wBallType], a
+	ld [wLoggingCurrentStatusBallLevel], a
 	add $30
 	ld [wBottomMessageText + $12], a
 	jr .done
@@ -1012,6 +1013,8 @@ ResolveBallUpgradeTriggersCollision_RedField: ; 0x1535d
 	ld hl, wScrollingText1
 	ld de, FieldMultiplierSpecialBonusText
 	call LoadScrollingText
+	ld a, 5
+	ld [wLoggingCurrentStatusBallLevel], a
 .done
 	call TransitionPinballUpgrade
 	jr LoadPinballUpgradeTriggersGraphics_RedField
@@ -1202,6 +1205,7 @@ UpdateBallTypeUpgradeCounter_RedField: ; 0x15575
 	add hl, bc
 	ld a, [hl]
 	ld [wBallType], a
+	ld [wLoggingCurrentStatusBallLevel], a
 	and a
 	jr z, .pokeball
 	; load approximately 1 minute of frames into wBallTypeCounter

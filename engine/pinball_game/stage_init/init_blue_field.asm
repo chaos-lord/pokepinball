@@ -14,6 +14,7 @@ InitBlueField: ; 0x1c000
 	ld [wCurBonusMultiplierFromFieldEvents], a
 	ld [wd4c9], a
 	ld [wBallType], a
+	ld [wLoggingCurrentStatusBallLevel], a
 	ld [wd4c8], a
 	ld hl, wPreviousNumPokeballs
 	ld [hli], a
