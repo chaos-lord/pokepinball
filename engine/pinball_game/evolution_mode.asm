@@ -349,6 +349,18 @@ PlaceEvolutionInParty: ; 0x10ca5
 	sla a
 	ld d, a
 	ld a, [wTimerSeconds]
+	ld e, a
+	and $0f
+	add d
+	ld d, a
+	ld a, e
+	swap a
+	and $0f
+	ld e, a
+	sla a
+	sla a
+	add e
+	sla a
 	add d
 	ld [wLoggingTimeTaken], a
     ld a, 1

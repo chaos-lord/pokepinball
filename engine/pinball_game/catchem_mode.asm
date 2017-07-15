@@ -48,7 +48,7 @@ StartCatchEmMode: ; 0x1003f
 	sla c
 	sla c ;rare flag not bit 6
 	ld a, [wLoggingCurrentStatusStatus] ;set rare flag in log, current status should never set this
-	and c
+	or c
 	ld [wLoggingStatus], a
 	ld a, [wLoggingCurrentStatusBallLevel]
 	ld [wLoggingCatchBallType], a
@@ -1074,12 +1074,24 @@ AddCaughtPokemonToParty: ; 0x1073d
 	sla a
 	ld c, a
 	ld a, [wTimerSeconds]
+	ld b, a
+	and $0f
 	add c
-	ld [hli], a
+	ld c, a
+	ld a, b
+	swap a
+	and $0f
+	ld b, a
+	sla a
+	sla a
+	add b
+	sla a
+	add c
+	ld [wLoggingTimeTaken], a
 	ld a, 1
 	ld [wCollectLogFlag], a
 	xor a
-	ld [hl], a
+	ld [wLoggingCatchBallType], a
 .SkipLoggingIfFull
 	ld a, [wNumPartyMons]
 	inc a

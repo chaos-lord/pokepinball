@@ -1013,7 +1013,7 @@ ResolveBallUpgradeTriggersCollision_RedField: ; 0x1535d
 	ld hl, wScrollingText1
 	ld de, FieldMultiplierSpecialBonusText
 	call LoadScrollingText
-	ld a, 5
+	ld a, 6
 	ld [wLoggingCurrentStatusBallLevel], a
 .done
 	call TransitionPinballUpgrade
