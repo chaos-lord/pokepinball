@@ -145,9 +145,9 @@ ChooseNextMap_RedField: ; 0x31282
 ; Picks the next map to perform a map move.
 ; Also records which maps have been visited.
     push bc
-    ld a, [wLoggingMapMoveCount]
+    ld a, [wLoggingCurrentStatusMapMoveCount]
     inc a
-    ld [wLoggingMapMoveCount], a
+    ld [wLoggingCurrentStatusMapMoveCount], a
     cp 9
     jr nc, .DontAddToMap
     ld c, a
@@ -160,7 +160,7 @@ ChooseNextMap_RedField: ; 0x31282
 .DoneShifting
     ld c, a
     ld a, [wLoggingCurrentStatusMapMoveMap]
-    and c
+    or c
     ld [wLoggingCurrentStatusMapMoveMap], a
 .DontAddToMap
     pop bc
@@ -343,9 +343,9 @@ ChooseNextMap_BlueField: ; 0x3140b
 ; Picks the next map to perform a map move.
 ; Also records which maps have been visited.
     push bc
-    ld a, [wLoggingMapMoveCount]
+    ld a, [wLoggingCurrentStatusMapMoveCount]
     inc a
-    ld [wLoggingMapMoveCount], a
+    ld [wLoggingCurrentStatusMapMoveCount], a
     cp 9
     jr nc, .DontAddToMap
     ld c, a
@@ -358,7 +358,7 @@ ChooseNextMap_BlueField: ; 0x3140b
 .DoneShifting
     ld c, a
     ld a, [wLoggingCurrentStatusMapMoveMap]
-    and c
+    or c
     ld [wLoggingCurrentStatusMapMoveMap], a
 .DontAddToMap
     pop bc

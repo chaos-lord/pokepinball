@@ -325,44 +325,20 @@ PlaceEvolutionInParty: ; 0x10ca5
 	add hl, bc
 	add hl, bc
 	ld a, [hl]
-	ld d, a
+	ld d, a ;get status byte
 	and %00110000
 	cp %00110000
 	ld a, d
-	jr c, .SkipAddition
+	jr z, .SkipAddition
 	add $10
-	ld [hli], a
 .SkipAddition
+    ld [hli], a
     ld [wLoggingStatus], a
     ld a, [hli]
     ld [wLoggingMapMoveCount], a
     ld a, [hli]
     ld [wLoggingMapMoveMap], a
-    ld a, [wTimerMinutes]
-	ld d, a
-	sla a
-	sla a
-	sla a
-	sla a ;*16 - 1 = 15 * 4 = 60
-	sub d
-	sla a
-	sla a
-	ld d, a
-	ld a, [wTimerSeconds]
-	ld e, a
-	and $0f
-	add d
-	ld d, a
-	ld a, e
-	swap a
-	and $0f
-	ld e, a
-	sla a
-	sla a
-	add e
-	sla a
-	add d
-	ld [wLoggingTimeTaken], a
+    callba LogTimer
     ld a, 1
     ld [wCollectLogFlag], a
 .LogFull

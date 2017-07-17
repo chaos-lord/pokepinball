@@ -31,7 +31,7 @@ StartCatchEmMode: ; 0x1003f
 	pop de ;pop current stage offset
 	ld hl, WildMonPointers
 	add hl, de
-	ld a, [hli] ;fetch start od correct wilds table, place in hl
+	ld a, [hli] ;fetch start of correct wilds table, place in hl
 	ld h, [hl]
 	ld l, a
 	add hl, bc
@@ -52,6 +52,10 @@ StartCatchEmMode: ; 0x1003f
 	ld [wLoggingStatus], a
 	ld a, [wLoggingCurrentStatusBallLevel]
 	ld [wLoggingCatchBallType], a
+	ld a, [wLoggingCurrentStatusMapMoveCount]
+	ld [wLoggingMapMoveCount], a
+	ld a, [wLoggingCurrentStatusMapMoveMap]
+	ld [wLoggingMapMoveMap], a
 	ld a, [hl]  ; a contains mon id. overshoots by 1 if mew, causing mew to be loaded
 	dec a
 	jp .NoOverride
@@ -1051,7 +1055,6 @@ AddCaughtPokemonToParty: ; 0x1073d
 	ld [wCaughtMonPickup], a
 	ld a, 1
 	ld [wCaughtFlag], a
-
 	jr nc, .SkipLoggingIfFull
 	ld hl, wLoggingCatchHistory ;record catch history in status log
 	add hl, bc
@@ -1063,6 +1066,19 @@ AddCaughtPokemonToParty: ; 0x1073d
 	ld [hli], a
 	ld a, [wLoggingMapMoveMap]
 	ld [hli], a
+	call LogTimer
+	ld a, 1
+	ld [wCollectLogFlag], a
+	xor a
+	ld [wLoggingCatchBallType], a
+.SkipLoggingIfFull
+	ld a, [wNumPartyMons]
+	inc a
+	ld [wNumPartyMons], a
+	ret
+
+LogTimer:
+    push bc
 	ld a, [wTimerMinutes]
 	ld c, a
 	sla a
@@ -1088,14 +1104,7 @@ AddCaughtPokemonToParty: ; 0x1073d
 	sla a
 	add c
 	ld [wLoggingTimeTaken], a
-	ld a, 1
-	ld [wCollectLogFlag], a
-	xor a
-	ld [wLoggingCatchBallType], a
-.SkipLoggingIfFull
-	ld a, [wNumPartyMons]
-	inc a
-	ld [wNumPartyMons], a
+	pop bc
 	ret
 
 SetPokemonSeenFlag: ; 0x10753

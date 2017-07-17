@@ -71,8 +71,11 @@ Func_ddfd: ; 0xddfd
 	ld a, [wSpecialMode]
 	and a
 	jr nz, .asm_de14
+	callba LogTimer
 	ld a, 2
 	ld [wCollectLogFlag], a
+	xor a
+	ld [wLoggingCatchBallType], a
 	callba ConcludeCatchEmMode
 	jr .asm_de40
 
@@ -83,8 +86,11 @@ Func_ddfd: ; 0xddfd
 	ld [wSlotIsOpen], a
 	ld a, $1e
 	ld [wFramesUntilSlotCaveOpens], a
+	callba LogTimer
     ld a, 3
 	ld [wCollectLogFlag], a
+	xor a
+	ld [wLoggingCatchBallType], a
 	callba ConcludeEvolutionMode
 	jr .asm_de40
 

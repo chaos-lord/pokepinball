@@ -216,10 +216,13 @@ Func_204b3: ; 0x204b3
 	ld a, [wTimeRanOut]
 	and a
 	ret z
+    xor a
+	ld [wTimeRanOut], a
+	ld [wLoggingTimeTaken], a
     ld a, 2
 	ld [wCollectLogFlag], a
 	xor a
-	ld [wTimeRanOut], a
+	ld [wLoggingCatchBallType], a
 	ld a, $7
 	ld [wd54d], a
 	; Automatically set Mew as caught, since you can't possibly catch it
