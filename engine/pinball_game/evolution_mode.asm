@@ -30,7 +30,7 @@ ConcludeEvolutionMode: ; 0x10ac8
 	xor a
 	ld [wInSpecialMode], a
 	ld [wWildMonIsHittable], a
-	ld [wd5b6], a
+	ld [wNumberOfCatchModeTilesFlipped], a
 	ld [wNumMonHits], a
 	ld [wd551], a
 	ld [wd554], a
@@ -92,7 +92,7 @@ VideoData_10b2a: ; 0x10b2a
 
 Func_10b3f: ; 0x10b3f
 	call FillBottomMessageBufferWithBlackTile
-	call Func_30db
+	call EnableBottomText
 	ld hl, wScrollingText1
 	ld a, [wCurrentEvolutionType]
 	cp EVO_EXPERIENCE
@@ -418,7 +418,7 @@ SelectPokemonToEvolve: ; 0x10cb7
 	call LoadVRAMData
 .asm_10cfc
 	call FillBottomMessageBufferWithBlackTile
-	ld a, SPECIAL_MODE_CATCHEM
+	ld a, SPECIAL_MODE_EVOLUTION
 	ld [wDrawBottomMessageBox], a
 	ld [wInSpecialMode], a
 	ld [wSpecialMode], a
@@ -434,7 +434,7 @@ SelectPokemonToEvolve: ; 0x10cb7
 	ret
 
 InitEvolutionModeForMon: ; 0x10d1d
-	ld hl, wd586
+	ld hl, wBillboardTilesIlluminationStates
 	ld b, $18
 .asm_10d22
 	ld a, $1
@@ -605,7 +605,7 @@ Func_10e0a: ; 0x10e0a
 	push bc
 	push de
 	call FillBottomMessageBufferWithBlackTile
-	call Func_30db
+	call EnableBottomText
 	ld hl, wScrollingText1
 	pop de
 	call LoadScrollingText
@@ -650,7 +650,7 @@ Func_10e8b: ; 0x10e8b
 	push bc
 	push de
 	call FillBottomMessageBufferWithBlackTile
-	call Func_30db
+	call EnableBottomText
 	ld hl, wScrollingText2
 	ld de, Data_2b6b
 	call Func_32cc

@@ -672,7 +672,7 @@ Func_1ab30: ; 0x1ab30
 	call InitAnimation
 	xor a
 	ld [wDugrioState], a
-	ld [wd498], a
+	ld [wNextBonusStage], a ; BONUS_STAGE_ORDER_GENGAR
 	ld a, $1
 	ld [wCompletedBonusStage], a
 	push bc
@@ -687,7 +687,7 @@ Func_1ab30: ; 0x1ab30
 .MaxStages
 	pop bc
 	call FillBottomMessageBufferWithBlackTile
-	call Func_30db
+	call EnableBottomText
 	ld hl, wScrollingText3
 	ld de, DiglettStageClearedText
 	call LoadScrollingText

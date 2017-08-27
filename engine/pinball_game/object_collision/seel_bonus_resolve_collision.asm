@@ -7,8 +7,8 @@ ResolveSeelBonusGameObjectCollisions: ; 0x25c5a
 	ld a, [wd794]
 	cp $2
 	jr nc, .asm_25c98
-	ld a, $1
-	ld [wd498], a
+	ld a, BONUS_STAGE_ORDER_MEWTWO
+	ld [wNextBonusStage], a
 	ld de, $0000
 	call PlaySong
 	ld a, $1
@@ -25,7 +25,7 @@ ResolveSeelBonusGameObjectCollisions: ; 0x25c5a
 .MaxStages
     pop bc
 	call FillBottomMessageBufferWithBlackTile
-	call Func_30db
+	call EnableBottomText
 	ld hl, wScrollingText3
 	ld de, SeelStageClearedText
 	call LoadScrollingText

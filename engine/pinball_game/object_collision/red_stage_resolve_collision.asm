@@ -978,7 +978,7 @@ ResolveBallUpgradeTriggersCollision_RedField: ; 0x1535d
 	lb de, $06, $3a
 	call PlaySoundEffect
 	call FillBottomMessageBufferWithBlackTile
-	call Func_30db
+	call EnableBottomText
 	ld de, FieldMultiplierText
 	ld hl, wScrollingText1
 	call LoadScrollingText
@@ -1004,7 +1004,7 @@ ResolveBallUpgradeTriggersCollision_RedField: ; 0x1535d
 	push bc
 	push de
 	call FillBottomMessageBufferWithBlackTile
-	call Func_30db
+	call EnableBottomText
 	ld hl, wScrollingText2
 	ld de, DigitsText1to8
 	call Func_32cc
@@ -2070,9 +2070,9 @@ DoSlotLogic_RedField: ; 0x16352
 	xor a
 	ld [wBonusStageSlotRewardActive], a
 	ld a, $1
-	ld [wd495], a
+	ld [wGoingToBonusStage], a
 	ld [wMoveToNextScreenState], a
-	ld a, [wd498]
+	ld a, [wNextBonusStage]
 	ld c, a
 	ld b, $0
 	ld hl, BonusStages_RedField
@@ -2113,7 +2113,7 @@ DoSlotLogic_RedField: ; 0x16352
 
 ShowScrollingGoToBonusText_RedField: ; 0x163f2
 	call FillBottomMessageBufferWithBlackTile
-	call Func_30db
+	call EnableBottomText
 	ld hl, wScrollingText3
 	ld a, [wNextStage]
 	ld de, GoToDiglettStageText
@@ -2182,7 +2182,7 @@ OpenSlotCave_RedField: ; 0x164e3
 	ld a, [wOpenedSlotByGetting3Pokeballs]
 	and a
 	jr z, .asm_164ff
-	ld a, [wd498]
+	ld a, [wNextBonusStage]
 	add $15
 	jr .asm_16506
 
@@ -2852,7 +2852,7 @@ ShowBonusMultiplierMessage_RedField: ; 0x16ef5
 	xor a
 	ld [wd613], a
 	call FillBottomMessageBufferWithBlackTile
-	call Func_30db
+	call EnableBottomText
 	ld hl, wScrollingText1
 	ld de, BonusMultiplierText
 	call LoadScrollingText

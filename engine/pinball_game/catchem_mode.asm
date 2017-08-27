@@ -75,24 +75,24 @@ StartCatchEmMode: ; 0x1003f
 	ld l, c
 	add hl, bc
 	add hl, bc  ; multiply the evolution line id by 3, add it to pointer to ???
-	ld bc, Data_13685 ;mystery data
+	ld bc, CatchSpriteFrameDurations ;mystery data, seems pokedex related too
 	add hl, bc
 	ld a, [hli]
-	ld [wd5c1], a
-	ld [wd5be], a
+	ld [wCurrentCatchMonIdleFrame1Duration], a
+	ld [wLoopsUntilNextCatchSpriteAnimationChange], a
 	ld a, [hli]
-	ld [wd5c2], a
+	ld [wCurrentCatchMonIdleFrame2Duration], a
 	ld a, [hli]
-	ld [wd5c3], a ;load the 3 bytes into ????
-	ld hl, wd586
-	ld a, [wd5b6]
+	ld [wCurrentCatchMonHitFrameDuration], a ;load the 3 bytes into ????
+	ld hl, wBillboardTilesIlluminationStates
+	ld a, [wNumberOfCatchModeTilesFlipped]
 	ld c, a
 	and a
 	ld b, $18
-	jr z, .asm_100c7 ;if ?? = 0, jump with b = 24 (2 seperate loops?
+	jr z, .asm_100c7 ;if tiles flipped = 0, jump with b = 24 (2 seperate loops?)
 .asm_100ba
 	ld a, $1
-	ld [hli], a ;load 1 then 0 into data from wd5b6 C times, where C is the contents of wd5b6
+	ld [hli], a ;load 1 then 0 into data from wNumberOfCatchModeTilesFlipped C times, where C is the contents of wNumberOfCatchModeTilesFlipped
 	xor a
 	ld [hli], a
 	dec b
@@ -101,7 +101,7 @@ StartCatchEmMode: ; 0x1003f
 	ld a, b ;load 24 - times looped into a, if 0: skip
 	and a
 	jr z, .asm_100ce
-.asm_100c7 ;loop 0 then 1 into the rest of the data from wd5b6
+.asm_100c7 ;loop 0 then 1 into the rest of the data from wNumberOfCatchModeTilesFlipped
 	xor a
 	ld [hli], a
 	inc a
@@ -185,7 +185,7 @@ ConcludeCatchEmMode: ; 0x10157
 	ld [wInSpecialMode], a
 	ld [wWildMonIsHittable], a
 	ld [wd5c6], a
-	ld [wd5b6], a
+	ld [wNumberOfCatchModeTilesFlipped], a
 	ld [wNumMonHits], a
 	call ClearWildMonCollisionMask
 	callba StopTimer
@@ -199,10 +199,10 @@ CallTable_10178: ; 0x10178
 	dw Func_109fc      ; STAGE_BLUE_FIELD_TOP
 	dw Func_109fc      ; STAGE_BLUE_FIELD_BOTTOM
 
-Func_10184: ; 0x10184
+Func_10184: ; 0x10184 called by what looks like the "hit voltorb and shellder" handllers and after all tiles are flipped, as well as some evo mode stuff
 	ld a, [wCurrentStage]
 	bit 0, a
-	ret z
+	ret z  ;skip if stage has no flippers
 	ld a, [wCurrentCatchEmMon]
 	ld c, a
 	ld b, $0
@@ -210,18 +210,18 @@ Func_10184: ; 0x10184
 	rl b
 	add c
 	ld c, a
-	jr nc, .asm_10199
+	jr nc, .NoOverflow
 	inc b
-.asm_10199
+.NoOverflow ;double current catch em mon
 	ld hl, MonBillboardPicPointers
 	add hl, bc
 	ld a, [hli]
-	ld [$ff8c], a
+	ld [$ff8c], a ;load 3 byte billboard pointer into Hram
 	ld a, [hli]
 	ld [$ff8d], a
 	ld a, [hl]
 	ld [$ff8e], a
-	ld hl, MonBillboardPaletteMapPointers
+	ld hl, MonBillboardPaletteMapPointers ;and the PAL pointers
 	add hl, bc
 	ld a, [hli]
 	ld [$ff8f], a
@@ -230,27 +230,27 @@ Func_10184: ; 0x10184
 	ld a, [hli]
 	ld [$ff91], a
 	ld de, wc000
-	ld hl, wd586
+	ld hl, wBillboardTilesIlluminationStates
 	ld c, $0
-.asm_101bb
+.Loop24Times
 	ld a, [hli]
 	cp [hl]
-	ld [hli], a
-	jr z, .asm_101d2
-	ld b, a
+	ld [hli], a ;load first byte into next and test it gainst the second byte, if it's the same skip
+	jr z, .NextLoop
+	ld b, a ;else store in b
 	call nz, Func_101d9
 	ld a, [hGameBoyColorFlag]
 	and a
-	jr z, .asm_101d2
+	jr z, .NextLoop ;skip if DMG
 	ld a, [wCurrentStage]
 	bit 0, a
 	ld a, b
-	call nz, Func_10230
-.asm_101d2
+	call nz, Func_10230 ;if lower stage, run ???
+.NextLoop
 	inc c
 	ld a, c
-	cp $18
-	jr nz, .asm_101bb
+	cp $18 ;run 24 times
+	jr nz, .Loop24Times
 	ret
 
 Func_101d9: ; 0x101d9
@@ -259,13 +259,13 @@ Func_101d9: ; 0x101d9
 	push de
 	push af
 	ld a, $10
-	ld [de], a
+	ld [de], a ;load 16 into de
 	inc de
 	ld a, $1
-	ld [de], a
+	ld [de], a ;1 into de+1
 	inc de
 	ld b, $0
-	ld hl, Data_102a4
+	ld hl, Data_102a4 ;retrieve ???? c
 	add hl, bc
 	ld c, [hl]
 	sla c
@@ -275,23 +275,23 @@ Func_101d9: ; 0x101d9
 	sla c
 	rl b
 	sla c
-	rl b
-	ld hl, vTilesSH tile $10
-	add hl, bc
+	rl b ;multiply ??? by 16
+	ld hl, vTilesSH tile $10 ;wut
+	add hl, bc ;add ???*16 to wut (8 2 bit pixels?)
 	ld a, l
 	ld [de], a
 	inc de
 	ld a, h
 	ld [de], a
-	inc de
-	ld a, [$ff8c]
+	inc de ;load result in to de
+	ld a, [$ff8c] ;loaded billboard pointer
 	ld l, a
 	ld a, [$ff8d]
 	ld h, a
-	add hl, bc
+	add hl, bc ;add ???*16
 	pop af
 	and a
-	jr nz, .asm_10215
+	jr nz, .asm_10215 ;if a is 0, add $180 (384)
 	ld bc, $0180
 	add hl, bc
 .asm_10215
@@ -303,14 +303,14 @@ Func_101d9: ; 0x101d9
 	inc de
 	ld a, [$ff8e]
 	ld [de], a
-	inc de
+	inc de ;load adjusted pointer into de, then 0
 	ld a, $0
 	ld [de], a
 	inc de
 	pop bc
 	push de
 	xor a
-	ld de, Func_11d2
+	ld de, Func_11d2 ;queue graphics load from the adjusted pointer bank 0 using this func
 	call QueueGraphicsToLoadWithFunc
 	pop de
 	pop hl
@@ -326,13 +326,13 @@ Func_10230: ; 0x10230
 	ld [de], a
 	inc de
 	ld [de], a
-	inc de
+	inc de ;load 1 into first 2 bytes from DE
 	ld b, $0
 	ld hl, Data_102a4
-	add hl, bc
+	add hl, bc ;retrieve entry c from ???
 	ld c, [hl]
 	sla c
-	ld hl, PointerTable_10274
+	ld hl, PointerTable_10274 ;grab billboard BG position(?) pointer entry c, place in de
 	add hl, bc
 	ld a, [hli]
 	ld [de], a
@@ -341,34 +341,34 @@ Func_10230: ; 0x10230
 	ld [de], a
 	inc de
 	srl c
-	ld a, [$ff8f]
+	ld a, [$ff8f];load PAL pointer
 	ld l, a
 	ld a, [$ff90]
 	ld h, a
-	add hl, bc
+	add hl, bc ;add the value from Data_102a4
 	pop af
 	and a
 	ld a, [$ff91]
-	call ReadByteFromBank
-	jr nz, .asm_10261
+	call ReadByteFromBank ;fetch pallete data
+	jr nz, .asm_10261 ;
 	ld a, $5
 .asm_10261
-	ld [de], a
+	ld [de], a ;if a's initial place is 0, make it 5 into de, else load the PAL bank
 	inc de
 	ld a, $0
-	ld [de], a
+	ld [de], a ;then load 0
 	inc de
 	pop bc
 	push de
 	xor a
-	ld de, LoadTileListsBank1
+	ld de, LoadTileListsBank1 ;load pal pointer as graphics?
 	call QueueGraphicsToLoadWithFunc
 	pop de
 	pop hl
 	pop bc
 	ret
 
-PointerTable_10274: ; 0x10274
+PointerTable_10274: ; 0x10274 4x6 area? the billboard's position?
 	dw $9887
 	dw $9888
 	dw $9889
@@ -786,14 +786,14 @@ CapturePokemon: ; 0x1052d
 	ld a, [wBallCaptureAnimationFrameCounter]
 	cp $1
 	ret nz
-	call Func_3475
+	call MainLoopUntilTextIsClear
 	ld de, $0000
 	call PlaySong
 	rst AdvanceFrame
 	lb de, $23, $29
 	call PlaySoundEffect
-	call Func_10825
-	call Func_3475
+	call ShowJackpotText
+	call MainLoopUntilTextIsClear
 	ld a, [wNumPartyMons]
 	and a
 	call z, Func_10848
@@ -858,14 +858,14 @@ BallCaptureAnimationData: ; 0x105e4
 	db $00  ; terminator
 
 Func_10611: ; 0x10611
-	and a
+	and a ;if a NZ
 	ret z
-	dec a
+	dec a ;dec a
 	sla a
 	ld c, a
 	ld b, $0
 	ld hl, Data_1062a
-	add hl, bc
+	add hl, bc ;load that graphics data and qeue it up
 	ld a, [hli]
 	ld c, a
 	ld a, [hl]
@@ -912,7 +912,7 @@ Func_10648: ; 0x10648
 	jr nz, .asm_10677
 	ld a, $14
 	ld [wd54e], a
-	ld hl, wd586
+	ld hl, wBillboardTilesIlluminationStates
 	ld b, $18
 .asm_1065e
 	ld a, [wd54f]
@@ -938,8 +938,8 @@ ShowAnimatedWildMon: ; 0x10678
 	ld hl, MonAnimatedSpriteTypes
 	add hl, bc
 	ld a, [hl]
-	ld [wd5bc], a
-	ld [wd5bd], a
+	ld [wCurrentAnimatedMonSpriteType], a
+	ld [wCurrentAnimatedMonSpriteFrame], a
 	ld a, $1
 	ld [wWildMonIsHittable], a
 	xor a
@@ -949,7 +949,7 @@ ShowAnimatedWildMon: ; 0x10678
 
 Func_10696: ; 0x10696
 	call FillBottomMessageBufferWithBlackTile
-	call Func_30db
+	call EnableBottomText
 	ld hl, wScrollingText1
 	ld de, LetsGetPokemonText
 	call LoadScrollingText
@@ -957,7 +957,7 @@ Func_10696: ; 0x10696
 
 Func_106a6: ; 0x106a6
 	call FillBottomMessageBufferWithBlackTile
-	call Func_30db
+	call EnableBottomText
 	ld hl, wScrollingText1
 	ld de, PokemonRanAwayText
 	call LoadScrollingText
@@ -998,7 +998,7 @@ Func_106b6: ; 0x106b6
 	push bc
 	push de
 	call FillBottomMessageBufferWithBlackTile
-	call Func_30db
+	call EnableBottomText
 	ld hl, wScrollingText1
 	pop de
 	call LoadScrollingText
@@ -1227,35 +1227,35 @@ PlayLowTimeSfx: ; 0x107f8
 	call PlaySoundEffect
 	ret
 
-Func_10825: ; 0x10825
-	call Retrieve8DigitBCDValueAtwd47a
-	push bc
+ShowJackpotText: ; 0x10825
+	call RetrieveJackpot ;retreive somethign score related, put it on the stack
+	push bc ;store data on stack to bge read in by LoadScoreTextFromStack
 	push de
 	call AddBCDEToCurBufferValue
 	call FillBottomMessageBufferWithBlackTile
-	call Func_30db
+	call EnableBottomText
 	ld hl, wStationaryText2
-	ld de, Data_2a50
-	call Func_3372
+	ld de, CatchModeJackpotScoreStationaryTextHeader
+	call LoadScoreTextFromStack
 	pop de
 	pop bc
 	ld hl, wStationaryText1
 	ld de, JackpotText
-	call Func_3357
+	call LoadStationaryTextAndHeader
 	ret
 
 Func_10848: ; 0x10848
 	ld bc, OneHundredMillionPoints
 	callba AddBigBCD6FromQueue
 	call FillBottomMessageBufferWithBlackTile
-	call Func_30db
+	call EnableBottomText
 	ld hl, wScrollingText2
 	ld de, OneBillionText
 	call LoadScrollingText
 	ld hl, wScrollingText1
 	ld de, PokemonCaughtSpecialBonusText
 	call LoadScrollingText
-	call Func_3475
+	call MainLoopUntilTextIsClear
 	ret
 
 Func_10871: ; 0x10871

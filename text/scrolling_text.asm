@@ -67,15 +67,15 @@ FlippedText:
 	db $42, $00, $40, $00
 	db "FLIPPED @"
 
-Data_2a3d:
+CatchModeTileFlippedScoreStationaryTextHeader:
 	db $4a, $10, $40, $00, $00, $00
 
 JackpotText:
 	db $42, $00, $b4, $00
 	db "JACKPOT @"
 
-Data_2a50:
-	db $4a, $10, $b4, $00, $00, $00
+CatchModeJackpotScoreStationaryTextHeader:
+	db $4a, $10, $b4, $00, $00, $00 ;stationarytextheader
 
 YouGotAText:
 	db $05, $54, $00, $00, $00, $1e

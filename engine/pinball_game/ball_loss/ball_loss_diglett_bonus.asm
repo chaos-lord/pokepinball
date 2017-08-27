@@ -6,9 +6,9 @@ HandleBallLossDiglettBonus: ; 0xe056
 	lb de, $00, $0b
 	call PlaySoundEffect
 	xor a
-	ld [wd495], a
+	ld [wGoingToBonusStage], a
 	ld a, $1
-	ld [wd496], a
+	ld [wReturningFromBonusStage], a
 	ld a, $2
 	ld [wd4c8], a
 	xor a
@@ -17,7 +17,7 @@ HandleBallLossDiglettBonus: ; 0xe056
 	and a
 	ret nz
 	call FillBottomMessageBufferWithBlackTile
-	call Func_30db
+	call EnableBottomText
 	ld hl, wScrollingText3
 	ld de, EndDiglettStageText
 	call LoadScrollingText
