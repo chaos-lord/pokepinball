@@ -352,6 +352,37 @@ PlaceEvolutionInParty: ; 0x10ca5
 	ld [hl], a
 	ret
 
+LogFailedEvoStatusAndMap:
+    push hl
+    ld a, [wCurSelectedPartyMon] ;get slot with info
+	ld c, a
+	ld b, $0
+	cp 196
+	jp nc, .LogFull
+	ld hl, wLoggingCatchHistory
+	add hl, bc
+	add hl, bc
+	add hl, bc
+	ld a, [hl]
+	ld [hli], a
+    ld [wLoggingStatus], a
+    ld a, [hli]
+    ld [wLoggingMapMoveCount], a
+    ld a, [hli]
+    ld [wLoggingMapMoveMap], a
+    callba LogTimer
+    ld a, 3
+	ld [wCollectLogFlag], a
+	xor a
+	ld [wLoggingCatchBallType], a
+    pop hl
+    ret
+.LogFull
+    xor a
+    ld [wLoggingCatchBallType], a
+    ret
+
+
 SelectPokemonToEvolve: ; 0x10cb7
 	call FillBottomMessageBufferWithBlackTile
 	call InitEvolutionSelectionMenu

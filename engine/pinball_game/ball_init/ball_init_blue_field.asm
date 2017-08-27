@@ -37,6 +37,7 @@ InitBallBlueField: ; 0x1c08d
 	ld [hli], a
 	ld [hli], a
 	ld [wBallType], a
+	ld [wLoggingCurrentStatusBallLevel], a
 	ld [wd611], a
 	ld [wd612], a
 	ld [wNumPokemonCaughtInBallBonus], a

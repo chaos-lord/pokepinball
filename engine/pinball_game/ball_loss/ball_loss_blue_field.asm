@@ -86,11 +86,7 @@ Func_ded6: ; 0xded6
 	ld [wSlotIsOpen], a
 	ld a, $1e
 	ld [wFramesUntilSlotCaveOpens], a
-	callba LogTimer
-    ld a, 3
-	ld [wCollectLogFlag], a
-	xor a
-	ld [wLoggingCatchBallType], a
+    callba LogFailedEvoStatusAndMap
 	callba ConcludeEvolutionMode
 	ret
 

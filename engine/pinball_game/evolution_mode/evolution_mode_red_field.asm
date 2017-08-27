@@ -251,11 +251,7 @@ Func_2077b: ; 0x2077b
 	ld [wd558], a
 	ld [wd559], a
 	ld [wd551], a
-	ld [wLoggingTimeTaken], a
-	ld a, 3
-	ld [wCollectLogFlag], a
-	xor a
-	ld [wLoggingCatchBallType], a
+	callba LogFailedEvoStatusAndMap
 	ld a, [wCurrentStage]
 	bit 0, a
 	jr z, .asm_207f5
